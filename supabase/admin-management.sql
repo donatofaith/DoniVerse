@@ -1,6 +1,7 @@
 -- FUTAGO admin management
 -- Run after supabase/admin-foundation.sql.
 -- Lets super admins add/remove other admins securely by email.
+-- Safe to run again: functions and policies are replaced cleanly.
 
 begin;
 
@@ -53,8 +54,8 @@ begin
     u.email::text,
     a.role,
     a.created_at
-  from public.admin_users a
-  left join auth.users u on u.id = a.user_id
+  from public.admin_users as a
+  left join auth.users as u on u.id = a.user_id
   order by
     case when a.role = 'super_admin' then 0 else 1 end,
     a.created_at asc;
@@ -64,7 +65,7 @@ $$;
 revoke all on function public.list_futago_admins() from public;
 grant execute on function public.list_futago_admins() to authenticated;
 
--- Add a registered FUTAGO user as admin using their account email.
+-- Add a registered FUTAGO user as admin using their Supabase Auth email.
 create or replace function public.set_futago_admin_by_email(
   target_email text,
   target_role text default 'admin'
@@ -92,10 +93,10 @@ begin
 
   normalized_email := lower(trim(target_email));
 
-  select id
+  select u.id
   into target_user_id
-  from auth.users
-  where lower(email) = normalized_email
+  from auth.users as u
+  where lower(u.email) = normalized_email
   limit 1;
 
   if target_user_id is null then
