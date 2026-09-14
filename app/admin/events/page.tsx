@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 
+import VenuePicker, { type CampusVenue } from "@/components/events/VenuePicker";
 import { supabase } from "@/lib/supabase/client";
 
 type EventStatus = "draft" | "pending" | "approved" | "rejected";
@@ -47,6 +48,7 @@ type EventRow = {
   starts_at: string;
   ends_at: string | null;
   venue_name: string | null;
+  venue_place_id: number | null;
   organizer_name: string;
   official_url: string | null;
   image_url: string | null;
@@ -64,6 +66,7 @@ type EventForm = {
   startsAt: string;
   endsAt: string;
   venueName: string;
+  venuePlaceId: number | null;
   organizerName: string;
   officialUrl: string;
   imageUrl: string;
@@ -79,6 +82,7 @@ const emptyForm: EventForm = {
   startsAt: "",
   endsAt: "",
   venueName: "",
+  venuePlaceId: null,
   organizerName: "",
   officialUrl: "",
   imageUrl: "",
@@ -141,17 +145,11 @@ export default function AdminEventsPage() {
   const [message, setMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
 
-  const clearPosterPreview = useCallback(() => {
-    setPosterFile(null);
-    setPosterPreview("");
-    setForm((current) => ({ ...current, imageUrl: "" }));
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
-    };
+  const releasePosterPreview = useCallback(() => {
+    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
   }, [posterPreview]);
+
+  useEffect(() => releasePosterPreview, [releasePosterPreview]);
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -182,7 +180,7 @@ export default function AdminEventsPage() {
     const { data, error: eventsError } = await supabase
       .from("events")
       .select(
-        "id,title,slug,description,event_type,starts_at,ends_at,venue_name,organizer_name,official_url,image_url,inquiry_name,inquiry_phone,status,is_featured,created_at",
+        "id,title,slug,description,event_type,starts_at,ends_at,venue_name,venue_place_id,organizer_name,official_url,image_url,inquiry_name,inquiry_phone,status,is_featured,created_at",
       )
       .order("created_at", { ascending: false });
 
@@ -208,7 +206,7 @@ export default function AdminEventsPage() {
   const pendingCount = events.filter((event) => event.status === "pending").length;
 
   const openCreate = () => {
-    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+    releasePosterPreview();
     setEditingId(null);
     setForm(emptyForm);
     setPosterFile(null);
@@ -219,7 +217,7 @@ export default function AdminEventsPage() {
   };
 
   const openEdit = (event: EventRow) => {
-    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+    releasePosterPreview();
     setEditingId(event.id);
     setForm({
       title: event.title,
@@ -228,6 +226,7 @@ export default function AdminEventsPage() {
       startsAt: toLocalDateTime(event.starts_at),
       endsAt: toLocalDateTime(event.ends_at),
       venueName: event.venue_name ?? "",
+      venuePlaceId: event.venue_place_id,
       organizerName: event.organizer_name,
       officialUrl: event.official_url ?? "",
       imageUrl: event.image_url ?? "",
@@ -247,20 +246,28 @@ export default function AdminEventsPage() {
     event.target.value = "";
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setError("Choose an image file for the event poster.");
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Choose a JPG, PNG or WebP image for the poster.");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Poster must be 5 MB or smaller.");
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Poster must be 2 MB or smaller.");
       return;
     }
 
-    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+    releasePosterPreview();
     setPosterFile(file);
     setPosterPreview(URL.createObjectURL(file));
     setError("");
+  };
+
+  const removePoster = () => {
+    releasePosterPreview();
+    setPosterFile(null);
+    setPosterPreview("");
+    setForm((current) => ({ ...current, imageUrl: "" }));
   };
 
   const uploadPoster = async () => {
@@ -301,6 +308,7 @@ export default function AdminEventsPage() {
         starts_at: new Date(form.startsAt).toISOString(),
         ends_at: form.endsAt ? new Date(form.endsAt).toISOString() : null,
         venue_name: form.venueName.trim() || null,
+        venue_place_id: form.venuePlaceId,
         organizer_name: organizer,
         official_url: form.officialUrl.trim() || null,
         image_url: posterUrl,
@@ -313,7 +321,10 @@ export default function AdminEventsPage() {
       };
 
       if (editingId) {
-        const { error: saveError } = await supabase.from("events").update(payload).eq("id", editingId);
+        const { error: saveError } = await supabase
+          .from("events")
+          .update(payload)
+          .eq("id", editingId);
         if (saveError) throw saveError;
       } else {
         const slugBase = slugify(title) || "event";
@@ -326,7 +337,7 @@ export default function AdminEventsPage() {
       }
 
       setMessage(editingId ? "Event updated." : "Event created.");
-      if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+      releasePosterPreview();
       setEditorOpen(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -398,7 +409,10 @@ export default function AdminEventsPage() {
         <div className="w-full max-w-md rounded-[30px] border border-white/60 bg-white/55 p-6 text-center shadow-xl backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/72">
           <ShieldCheck className="mx-auto text-[#397151] dark:text-[#9bedb7]" size={30} />
           <h1 className="mt-4 text-2xl font-black">Admin access required</h1>
-          <button onClick={() => router.replace("/")} className="mt-5 min-h-12 rounded-[16px] bg-white/60 px-5 text-sm font-extrabold dark:bg-white/[0.06]">
+          <button
+            onClick={() => router.replace("/")}
+            className="mt-5 min-h-12 rounded-[16px] bg-white/60 px-5 text-sm font-extrabold dark:bg-white/[0.06]"
+          >
             Back to FUTAGO
           </button>
         </div>
@@ -410,10 +424,17 @@ export default function AdminEventsPage() {
     <main className="relative min-h-[100dvh] bg-transparent pb-14 text-[#102017] dark:text-white">
       <div className="mx-auto w-full max-w-[1120px] px-4 pb-10 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8">
         <header className="flex items-center justify-between gap-3">
-          <button onClick={() => router.push("/admin")} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/65 bg-white/50 backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]" aria-label="Back to admin">
+          <button
+            onClick={() => router.push("/admin")}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/65 bg-white/50 backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]"
+            aria-label="Back to admin"
+          >
             <ArrowLeft size={18} />
           </button>
-          <button onClick={() => void loadEvents()} className="flex min-h-11 items-center gap-2 rounded-full border border-white/60 bg-white/45 px-4 text-xs font-black backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.05]">
+          <button
+            onClick={() => void loadEvents()}
+            className="flex min-h-11 items-center gap-2 rounded-full border border-white/60 bg-white/45 px-4 text-xs font-black backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.05]"
+          >
             <RefreshCcw size={15} /> Refresh
           </button>
         </header>
@@ -424,25 +445,47 @@ export default function AdminEventsPage() {
               <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#397151] dark:text-[#9bedb7]">
                 <CalendarDays size={16} /> Event moderation
               </div>
-              <h1 className="mt-2 text-[34px] font-black leading-none tracking-[-0.055em] sm:text-[46px]">Manage campus events.</h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-black/50 dark:text-white/45">Approve submissions, reject invalid events, or publish events directly.</p>
+              <h1 className="mt-2 text-[34px] font-black leading-none tracking-[-0.055em] sm:text-[46px]">
+                Manage campus events.
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-black/50 dark:text-white/45">
+                Approve submissions, reject invalid events, or publish events directly.
+              </p>
             </div>
-            <button onClick={openCreate} className="flex min-h-12 items-center justify-center gap-2 rounded-[17px] border border-[#77b68d]/35 bg-[#dff3e5]/90 px-5 text-sm font-black text-[#17462d] shadow-sm dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]">
+            <button
+              onClick={openCreate}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-[17px] border border-[#77b68d]/35 bg-[#dff3e5]/90 px-5 text-sm font-black text-[#17462d] shadow-sm dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]"
+            >
               <Plus size={17} /> New event
             </button>
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {(["pending", "approved", "rejected", "all"] as const).map((item) => (
-              <button key={item} onClick={() => setFilter(item)} className={`min-h-11 rounded-[15px] border px-3 text-xs font-black capitalize ${filter === item ? "border-[#79b98f]/40 bg-[#dff3e5]/85 text-[#245c3a] dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]" : "border-white/60 bg-white/35 text-black/45 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/45"}`}>
-                {item}{item === "pending" ? ` (${pendingCount})` : ""}
+              <button
+                key={item}
+                onClick={() => setFilter(item)}
+                className={`min-h-11 rounded-[15px] border px-3 text-xs font-black capitalize ${
+                  filter === item
+                    ? "border-[#79b98f]/40 bg-[#dff3e5]/85 text-[#245c3a] dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]"
+                    : "border-white/60 bg-white/35 text-black/45 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/45"
+                }`}
+              >
+                {item}
+                {item === "pending" ? ` (${pendingCount})` : ""}
               </button>
             ))}
           </div>
         </section>
 
         {(error || message) && (
-          <div className={`mt-4 rounded-[18px] border px-4 py-3 text-sm font-semibold backdrop-blur-2xl ${error ? "border-red-400/20 bg-red-400/10 text-red-700 dark:text-red-300" : "border-emerald-500/20 bg-emerald-400/10 text-emerald-800 dark:text-emerald-200"}`}>
+          <div
+            className={`mt-4 rounded-[18px] border px-4 py-3 text-sm font-semibold backdrop-blur-2xl ${
+              error
+                ? "border-red-400/20 bg-red-400/10 text-red-700 dark:text-red-300"
+                : "border-emerald-500/20 bg-emerald-400/10 text-emerald-800 dark:text-emerald-200"
+            }`}
+          >
             {error || message}
           </div>
         )}
@@ -451,60 +494,108 @@ export default function AdminEventsPage() {
           <section className="mt-5 rounded-[28px] border border-white/60 bg-white/50 p-5 shadow-[0_24px_70px_rgba(16,46,28,0.12)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/72 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-[#397151] dark:text-[#9bedb7]">{editingId ? "Edit event" : "Create event"}</p>
-                <h2 className="mt-1 text-xl font-black">{editingId ? "Update event details" : "Add a campus event"}</h2>
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-[#397151] dark:text-[#9bedb7]">
+                  {editingId ? "Edit event" : "Create event"}
+                </p>
+                <h2 className="mt-1 text-xl font-black">
+                  {editingId ? "Update event details" : "Add a campus event"}
+                </h2>
               </div>
-              <button onClick={() => setEditorOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/45 dark:border-white/10 dark:bg-white/[0.05]" aria-label="Close editor"><X size={17} /></button>
+              <button
+                type="button"
+                onClick={() => setEditorOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/45 dark:border-white/10 dark:bg-white/[0.05]"
+                aria-label="Close editor"
+              >
+                <X size={17} />
+              </button>
             </div>
 
             <form onSubmit={saveEvent} className="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="Event title"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Event title" /></Field>
-              <Field label="Organiser"><input value={form.organizerName} onChange={(e) => setForm({ ...form, organizerName: e.target.value })} placeholder="Organiser name" /></Field>
-              <Field label="Starts"><input type="datetime-local" value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} /></Field>
-              <Field label="Ends"><input type="datetime-local" value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} /></Field>
-              <Field label="Venue"><input value={form.venueName} onChange={(e) => setForm({ ...form, venueName: e.target.value })} placeholder="Venue" /></Field>
-              <Field label="Event type"><select value={form.eventType} onChange={(e) => setForm({ ...form, eventType: e.target.value as EventType })}>{eventTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></Field>
-              <Field label="Inquiry name"><input value={form.inquiryName} onChange={(e) => setForm({ ...form, inquiryName: e.target.value })} placeholder="Contact person" /></Field>
-              <Field label="Inquiry phone"><input value={form.inquiryPhone} onChange={(e) => setForm({ ...form, inquiryPhone: e.target.value })} placeholder="Phone number" inputMode="tel" /></Field>
+              <Field label="Event title">
+                <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Event title" />
+              </Field>
+              <Field label="Organiser">
+                <input value={form.organizerName} onChange={(event) => setForm({ ...form, organizerName: event.target.value })} placeholder="Organiser name" />
+              </Field>
+              <Field label="Starts">
+                <input type="datetime-local" value={form.startsAt} onChange={(event) => setForm({ ...form, startsAt: event.target.value })} />
+              </Field>
+              <Field label="Ends">
+                <input type="datetime-local" value={form.endsAt} onChange={(event) => setForm({ ...form, endsAt: event.target.value })} />
+              </Field>
+
+              <div className="md:col-span-2">
+                <VenuePicker
+                  value={form.venueName}
+                  selectedPlaceId={form.venuePlaceId}
+                  onChange={(value) => setForm((current) => ({ ...current, venueName: value }))}
+                  onSelect={(place: CampusVenue) => setForm((current) => ({ ...current, venueName: place.name, venuePlaceId: place.id }))}
+                  onClearSelection={() => setForm((current) => ({ ...current, venuePlaceId: null }))}
+                />
+              </div>
+
+              <Field label="Event type">
+                <select value={form.eventType} onChange={(event) => setForm({ ...form, eventType: event.target.value as EventType })}>
+                  {eventTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+                </select>
+              </Field>
+              <Field label="Status">
+                <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as EventStatus })}>
+                  <option value="draft">Draft</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </Field>
+              <Field label="Inquiry name">
+                <input value={form.inquiryName} onChange={(event) => setForm({ ...form, inquiryName: event.target.value })} placeholder="Contact person" />
+              </Field>
+              <Field label="Inquiry phone">
+                <input value={form.inquiryPhone} onChange={(event) => setForm({ ...form, inquiryPhone: event.target.value })} placeholder="Phone number" inputMode="tel" />
+              </Field>
 
               <div className="md:col-span-2">
                 <span className="text-sm font-bold text-black/60 dark:text-white/60">Event poster</span>
-                <div className="mt-2 overflow-hidden rounded-[20px] border border-white/65 bg-white/40 p-3 backdrop-blur-xl dark:border-white/10 dark:bg-[#101914]/70">
+                <div className="mt-2 rounded-[20px] border border-white/65 bg-white/42 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#101914]/70">
                   {posterPreview ? (
-                    <div className="relative overflow-hidden rounded-[16px] border border-white/60 bg-black/5 dark:border-white/10 dark:bg-black/20">
-                      <img src={posterPreview} alt="Event poster preview" className="max-h-[360px] w-full object-contain" />
-                      <button
-                        type="button"
-                        onClick={clearPosterPreview}
-                        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-xl"
-                        aria-label="Remove poster"
-                      >
-                        <X size={16} />
-                      </button>
+                    <div className="overflow-hidden rounded-[16px] border border-white/50 dark:border-white/10">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={posterPreview} alt="Event poster preview" className="max-h-[360px] w-full object-cover" />
                     </div>
                   ) : (
-                    <div className="flex min-h-[150px] flex-col items-center justify-center rounded-[16px] border border-dashed border-black/10 bg-white/25 px-5 text-center dark:border-white/10 dark:bg-white/[0.03]">
-                      <ImagePlus size={25} className="text-[#397151] dark:text-[#9bedb7]" />
-                      <p className="mt-3 text-sm font-black">Upload event poster</p>
-                      <p className="mt-1 text-xs text-black/40 dark:text-white/35">JPG, PNG or WebP · maximum 5 MB</p>
+                    <div className="flex min-h-[180px] flex-col items-center justify-center rounded-[16px] border border-dashed border-black/15 bg-white/25 text-center dark:border-white/10 dark:bg-white/[0.03]">
+                      <ImagePlus size={24} className="text-black/30 dark:text-white/30" />
+                      <p className="mt-3 text-sm font-black">No poster selected</p>
                     </div>
                   )}
-
-                  <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[15px] border border-white/65 bg-white/55 px-4 text-sm font-black text-[#214f34] transition active:scale-[0.99] dark:border-white/10 dark:bg-white/[0.06] dark:text-[#a9efc1]">
-                    <ImagePlus size={17} />
-                    {posterPreview ? "Change poster" : "Choose poster"}
-                    <input type="file" accept="image/jpeg,image/png,image/webp" onChange={choosePoster} className="hidden" />
-                  </label>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-[#77b68d]/35 bg-[#dff3e5]/90 px-4 text-xs font-black text-[#17462d] dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]">
+                      <ImagePlus size={15} /> {posterPreview ? "Change poster" : "Choose poster"}
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={choosePoster} className="hidden" />
+                    </label>
+                    {posterPreview && (
+                      <button type="button" onClick={removePoster} className="min-h-11 rounded-[14px] border border-red-400/15 bg-red-400/[0.07] px-4 text-xs font-black text-red-700 dark:text-red-300">
+                        Remove poster
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-2 text-[11px] leading-5 text-black/40 dark:text-white/35">JPG, PNG or WebP. Maximum 2 MB.</p>
                 </div>
               </div>
 
-              <Field label="Official link"><input value={form.officialUrl} onChange={(e) => setForm({ ...form, officialUrl: e.target.value })} placeholder="https://..." /></Field>
-              <Field label="Status"><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as EventStatus })}><option value="draft">Draft</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></Field>
-              <div className="md:col-span-2"><Field label="Description"><textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What is this event about?" /></Field></div>
+              <Field label="Official link">
+                <input value={form.officialUrl} onChange={(event) => setForm({ ...form, officialUrl: event.target.value })} placeholder="https://..." />
+              </Field>
+              <div className="md:col-span-2">
+                <Field label="Description">
+                  <textarea rows={4} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="What is this event about?" />
+                </Field>
+              </div>
 
               <button type="submit" disabled={saving} className="md:col-span-2 flex min-h-[56px] items-center justify-center gap-2 rounded-[18px] border border-[#77b68d]/35 bg-[#dff3e5]/90 px-5 text-sm font-black text-[#17462d] disabled:opacity-60 dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]">
                 {saving ? <Loader2 size={17} className="animate-spin" /> : <Check size={17} />}
-                {saving ? "Saving..." : editingId ? "Save changes" : "Create event"}
+                {editingId ? "Save changes" : "Create event"}
               </button>
             </form>
           </section>
@@ -518,10 +609,13 @@ export default function AdminEventsPage() {
             </div>
           ) : (
             visibleEvents.map((event) => (
-              <article key={event.id} className="overflow-hidden rounded-[24px] border border-white/60 bg-white/42 shadow-[0_18px_55px_rgba(16,46,28,0.08)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/58">
-                {event.image_url && <img src={event.image_url} alt="" className="h-44 w-full object-cover sm:h-52" />}
-                <div className="p-5">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <article key={event.id} className="rounded-[24px] border border-white/60 bg-white/42 p-5 shadow-[0_18px_55px_rgba(16,46,28,0.08)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/58">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="flex min-w-0 gap-4">
+                    {event.image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={event.image_url} alt="" className="h-20 w-20 shrink-0 rounded-[16px] object-cover" />
+                    )}
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${statusClass(event.status)}`}>{event.status}</span>
@@ -529,16 +623,21 @@ export default function AdminEventsPage() {
                       </div>
                       <h2 className="mt-2 text-xl font-black tracking-[-0.035em]">{event.title}</h2>
                       <p className="mt-2 text-sm text-black/48 dark:text-white/45">{new Date(event.starts_at).toLocaleString()}</p>
-                      {event.venue_name && <p className="mt-1 flex items-center gap-1.5 text-sm text-black/48 dark:text-white/45"><MapPin size={14} /> {event.venue_name}</p>}
+                      {event.venue_name && (
+                        <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-black/48 dark:text-white/45">
+                          <MapPin size={14} /> {event.venue_name}
+                          {event.venue_place_id ? <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-black text-emerald-800 dark:text-emerald-200">Mapped</span> : null}
+                        </p>
+                      )}
                       <p className="mt-2 text-xs font-semibold text-black/35 dark:text-white/35">Organiser: {event.organizer_name}</p>
                     </div>
+                  </div>
 
-                    <div className="flex flex-wrap gap-2 md:justify-end">
-                      <button onClick={() => openEdit(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/45 px-3 text-xs font-black dark:border-white/10 dark:bg-white/[0.05]"><Edit3 size={14} /> Edit</button>
-                      {event.status !== "approved" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "approved")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-emerald-500/20 bg-emerald-400/10 px-3 text-xs font-black text-emerald-800 dark:text-emerald-200"><Check size={14} /> Approve</button>}
-                      {event.status !== "rejected" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "rejected")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-amber-500/20 bg-amber-400/10 px-3 text-xs font-black text-amber-800 dark:text-amber-200"><X size={14} /> Reject</button>}
-                      <button disabled={actingId === event.id} onClick={() => void deleteEvent(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-red-400/15 bg-red-400/[0.07] px-3 text-xs font-black text-red-700 dark:text-red-300"><Trash2 size={14} /> Delete</button>
-                    </div>
+                  <div className="flex flex-wrap gap-2 md:justify-end">
+                    <button onClick={() => openEdit(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/45 px-3 text-xs font-black dark:border-white/10 dark:bg-white/[0.05]"><Edit3 size={14} /> Edit</button>
+                    {event.status !== "approved" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "approved")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-emerald-500/20 bg-emerald-400/10 px-3 text-xs font-black text-emerald-800 dark:text-emerald-200"><Check size={14} /> Approve</button>}
+                    {event.status !== "rejected" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "rejected")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-amber-500/20 bg-amber-400/10 px-3 text-xs font-black text-amber-800 dark:text-amber-200"><X size={14} /> Reject</button>}
+                    <button disabled={actingId === event.id} onClick={() => void deleteEvent(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-red-400/15 bg-red-400/[0.07] px-3 text-xs font-black text-red-700 dark:text-red-300"><Trash2 size={14} /> Delete</button>
                   </div>
                 </div>
               </article>
