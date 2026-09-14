@@ -13,7 +13,7 @@ export type CampusVenue = {
   category: string;
   latitude: number;
   longitude: number;
-  source: "futago" | "openstreetmap";
+  source: "futago" | "openstreetmap" | "campus";
   subtitle?: string | null;
 };
 
@@ -36,12 +36,38 @@ type RemoteVenue = {
   source: "openstreetmap";
 };
 
+const campusFallbacks: CampusVenue[] = [
+  {
+    id: null,
+    name: "T.I. Francis Auditorium",
+    short_name: "TI Francis",
+    building_name: "T.I. Francis Auditorium",
+    category: "auditorium",
+    latitude: 7.3013375,
+    longitude: 5.138046875,
+    source: "campus",
+    subtitle: "Obanla, FUTA",
+  },
+];
+
+const campusAliases: Record<string, string[]> = {
+  "tifrancisauditorium": [
+    "ti francis",
+    "t.i francis",
+    "t.i. francis",
+    "tia francis",
+    "francis auditorium",
+    "ti francis auditorium",
+  ],
+};
+
 function normalize(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function searchableText(place: CampusVenue) {
-  return `${place.name} ${place.short_name ?? ""} ${place.building_name ?? ""} ${place.category}`.toLowerCase();
+  const aliases = campusAliases[normalize(place.name)] ?? [];
+  return `${place.name} ${place.short_name ?? ""} ${place.building_name ?? ""} ${place.category} ${aliases.join(" ")}`.toLowerCase();
 }
 
 export default function VenuePicker({
@@ -101,10 +127,14 @@ export default function VenuePicker({
   const localSuggestions = useMemo(() => {
     const query = value.trim().toLowerCase();
     const compactQuery = normalize(value);
+    const combined = [...places, ...campusFallbacks].filter(
+      (place, index, list) =>
+        list.findIndex((item) => normalize(item.name) === normalize(place.name)) === index,
+    );
 
-    if (!query) return places.slice(0, 6);
+    if (!query) return combined.slice(0, 7);
 
-    return places
+    return combined
       .filter((place) => {
         const normalText = searchableText(place);
         const compactText = normalize(normalText);
@@ -248,7 +278,7 @@ export default function VenuePicker({
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-black text-[#102017] dark:text-white">{place.name}</p>
                       <span className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-black/40 dark:bg-white/[0.07] dark:text-white/40">
-                        {place.source === "futago" ? "FUTAGO" : "Map"}
+                        {place.source === "futago" ? "FUTAGO" : place.source === "campus" ? "Campus" : "Map"}
                       </span>
                     </div>
                     <p className="mt-0.5 line-clamp-2 text-xs text-black/42 dark:text-white/38">
