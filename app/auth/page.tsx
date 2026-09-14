@@ -36,22 +36,23 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     video.muted = true;
-    const play = () => {
+    const tryPlay = () => {
       void video.play().catch(() => {
-        // Poster remains visible when a browser blocks autoplay.
+        // The poster image remains visible if autoplay is unavailable.
       });
     };
 
-    if (video.readyState >= 2) play();
-    else video.addEventListener("canplay", play, { once: true });
+    if (video.readyState >= 2) tryPlay();
+    else video.addEventListener("canplay", tryPlay, { once: true });
 
-    return () => video.removeEventListener("canplay", play);
+    return () => video.removeEventListener("canplay", tryPlay);
   }, []);
 
   const resetFeedback = () => {
@@ -203,13 +204,15 @@ export default function AuthPage() {
         />
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover"
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${videoReady ? "opacity-100" : "opacity-0"}`}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
           poster={FUTA_CAMPUS_IMAGE}
+          onCanPlay={() => setVideoReady(true)}
+          onPlaying={() => setVideoReady(true)}
           aria-hidden="true"
         >
           <source src={FUTA_CAMPUS_VIDEO} type="video/mp4" />
