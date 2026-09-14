@@ -1,11 +1,20 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  Check,
+  ChevronDown,
   GraduationCap,
   Hash,
   Loader2,
@@ -38,6 +47,11 @@ type ProfileRow = {
   level: number | string | null;
   student_status: string | null;
   onboarding_completed: boolean | null;
+};
+
+type SelectOption = {
+  value: string;
+  label: string;
 };
 
 const levels = [100, 200, 300, 400, 500, 600];
@@ -193,7 +207,7 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-[100dvh] items-center justify-center bg-[#edf2ed] text-[#102017] dark:bg-[#050b07] dark:text-white">
+      <main className="flex min-h-[100dvh] items-center justify-center bg-transparent text-[#102017] dark:text-white">
         <div className="rounded-[26px] border border-white/60 bg-white/55 px-7 py-6 text-center shadow-xl backdrop-blur-3xl dark:border-white/10 dark:bg-white/[0.05]">
           <Loader2 className="mx-auto animate-spin" size={22} />
           <p className="mt-3 text-sm font-bold">Loading your profile...</p>
@@ -203,12 +217,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#edf2ed] pb-12 text-[#102017] dark:bg-[#050b07] dark:text-white">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -right-28 top-[-70px] h-[340px] w-[340px] rounded-full bg-[#7edca0]/20 blur-[115px] dark:bg-[#7edca0]/10" />
-        <div className="absolute -left-28 top-[520px] h-[330px] w-[330px] rounded-full bg-[#e7c963]/14 blur-[115px] dark:bg-[#e7c963]/[0.06]" />
-      </div>
-
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-transparent pb-12 text-[#102017] dark:text-white">
       <div className="relative mx-auto w-full max-w-[1080px] px-4 pb-[max(32px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8">
         <header className="flex items-center justify-between gap-4">
           <button
@@ -231,7 +240,7 @@ export default function OnboardingPage() {
           </div>
         </header>
 
-        <section className="mt-7 rounded-[32px] border border-white/65 bg-white/46 p-5 shadow-[0_26px_80px_rgba(26,58,39,0.1)] backdrop-blur-3xl dark:border-white/10 dark:bg-white/[0.045] sm:p-7 md:p-8">
+        <section className="mt-7 rounded-[32px] border border-white/65 bg-white/46 p-5 shadow-[0_26px_80px_rgba(26,58,39,0.1)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0c1511]/45 sm:p-7 md:p-8">
           <div className="max-w-2xl">
             <p className="text-xs font-black uppercase tracking-[0.15em] text-[#3c7854] dark:text-[#9bedb7]">
               {editingExistingProfile ? "Profile" : "Student setup"}
@@ -392,7 +401,7 @@ function TextField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          className={`min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:normal-case placeholder:text-black/28 dark:placeholder:text-white/25 ${uppercase ? "uppercase" : ""}`}
+          className={`min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:normal-case placeholder:text-black/28 dark:text-white dark:placeholder:text-white/25 ${uppercase ? "uppercase" : ""}`}
         />
       </div>
     </div>
@@ -413,28 +422,91 @@ function SelectField({
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  options: { value: string; label: string }[];
+  options: SelectOption[];
   disabled?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    const close = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, []);
+
+  useEffect(() => {
+    if (disabled) setOpen(false);
+  }, [disabled]);
+
   return (
-    <div>
+    <div ref={ref} className="relative">
       <label className="text-sm font-bold text-black/60 dark:text-white/60">{label}</label>
-      <div className="mt-2 flex h-[58px] items-center gap-3 rounded-[18px] border border-white/65 bg-white/45 px-4 shadow-sm backdrop-blur-2xl focus-within:border-[#6caf83]/45 dark:border-white/10 dark:bg-white/[0.04]">
+      <button
+        type="button"
+        disabled={disabled}
+        aria-expanded={open}
+        onClick={() => !disabled && setOpen((current) => !current)}
+        className={`mt-2 flex min-h-[58px] w-full items-center gap-3 rounded-[18px] border px-4 text-left shadow-sm backdrop-blur-2xl transition disabled:cursor-not-allowed disabled:opacity-45 ${
+          open
+            ? "border-[#6caf83]/45 bg-white/60 ring-4 ring-[#6caf83]/10 dark:border-[#8ce6ad]/25 dark:bg-[#101914]/90"
+            : "border-white/65 bg-white/45 dark:border-white/10 dark:bg-[#101914]/70"
+        }`}
+      >
         <span className="shrink-0 text-black/35 dark:text-white/35">{icon}</span>
-        <select
-          value={value}
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          className="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none disabled:opacity-45"
+        <span
+          className={`min-w-0 flex-1 truncate text-base font-semibold ${
+            selected ? "text-[#102017] dark:text-white" : "text-black/28 dark:text-white/30"
+          }`}
         >
-          <option value="">{placeholder}</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+          {selected?.label ?? placeholder}
+        </span>
+        <ChevronDown
+          size={17}
+          className={`shrink-0 text-black/35 transition dark:text-white/35 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && !disabled && (
+        <div className="absolute left-0 right-0 top-full z-[80] mt-2 overflow-hidden rounded-[20px] border border-white/70 bg-[rgba(239,245,240,0.96)] p-2 shadow-[0_24px_70px_rgba(17,46,29,0.22)] backdrop-blur-3xl dark:border-white/10 dark:bg-[rgba(12,21,16,0.97)]">
+          <div className="max-h-[270px] overflow-y-auto overscroll-contain pr-1">
+            {options.length === 0 ? (
+              <div className="px-3 py-4 text-sm font-medium text-black/40 dark:text-white/35">
+                No options available
+              </div>
+            ) : (
+              options.map((option) => {
+                const active = option.value === value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setOpen(false);
+                    }}
+                    className={`flex min-h-[50px] w-full items-center justify-between gap-3 rounded-[14px] px-3 py-2.5 text-left transition ${
+                      active
+                        ? "bg-[#dff3e5] text-[#214f34] dark:bg-[#8ce6ad]/15 dark:text-[#baf4cd]"
+                        : "text-[#102017] hover:bg-white/65 dark:text-white dark:hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    <span className="min-w-0 flex-1 text-sm font-semibold leading-5">
+                      {option.label}
+                    </span>
+                    {active && <Check size={16} className="shrink-0" />}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
