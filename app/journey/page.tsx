@@ -37,6 +37,8 @@ type JourneyStep = {
 };
 
 const STORAGE_KEY = "futago-fresher-journey-v1";
+const FUTA_CAMPUS_IMAGE =
+  "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
 
 const STATUS_LABELS: Record<StepStatus, string> = {
   not_started: "Not started",
@@ -178,9 +180,7 @@ export default function JourneyPage() {
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setStatuses(JSON.parse(stored) as Record<string, StepStatus>);
-      }
+      if (stored) setStatuses(JSON.parse(stored) as Record<string, StepStatus>);
     } catch {
       // Use default progress when local storage is unavailable.
     } finally {
@@ -193,7 +193,7 @@ export default function JourneyPage() {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(statuses));
     } catch {
-      // Keep the current-session progress if storage is unavailable.
+      // Keep current-session progress if storage is unavailable.
     }
   }, [ready, statuses]);
 
@@ -212,20 +212,32 @@ export default function JourneyPage() {
   };
 
   return (
-    <main className="min-h-[100dvh] overflow-x-hidden bg-[#f3f3ed] pb-32 text-[#102017] dark:bg-[#061009] dark:text-white">
-      <div className="mx-auto w-full max-w-[1180px] px-4 pb-8 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8 lg:px-10">
-        <header className="flex items-center justify-between gap-3">
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#e9efe9] pb-32 text-[#102017] dark:bg-[#050b07] dark:text-white">
+      <div
+        className="pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.23] dark:opacity-[0.16]"
+        style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none fixed inset-0 bg-[linear-gradient(180deg,rgba(244,248,244,0.80)_0%,rgba(236,243,238,0.92)_40%,rgba(228,237,231,0.97)_100%)] dark:bg-[linear-gradient(180deg,rgba(5,11,7,0.72)_0%,rgba(5,11,7,0.90)_42%,rgba(5,11,7,0.97)_100%)]"
+        aria-hidden="true"
+      />
+      <div className="pointer-events-none fixed -right-24 top-20 h-72 w-72 rounded-full bg-[#8fddb0]/25 blur-[110px]" aria-hidden="true" />
+      <div className="pointer-events-none fixed -left-24 bottom-28 h-72 w-72 rounded-full bg-[#e4c469]/18 blur-[120px]" aria-hidden="true" />
+
+      <div className="relative mx-auto w-full max-w-[1180px] px-4 pb-8 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8 lg:px-10">
+        <header className="flex items-center justify-between gap-3 rounded-[24px] border border-white/60 bg-white/45 p-3 shadow-[0_16px_50px_rgba(22,53,34,0.08)] backdrop-blur-3xl dark:border-white/[0.09] dark:bg-white/[0.04]">
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-black/[0.06] bg-white/80 text-[#183624] shadow-sm backdrop-blur-xl transition active:scale-95 dark:border-white/[0.08] dark:bg-white/[0.055] dark:text-white"
+            className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-white/65 bg-white/55 text-[#183624] shadow-sm backdrop-blur-xl transition active:scale-95 dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
             aria-label="Back to home"
           >
             <ArrowLeft size={19} />
           </button>
 
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] bg-[#123f29] text-white dark:bg-[#8ce6ad] dark:text-[#082013]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border border-white/60 bg-white/55 text-[#245c3b] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#9ae9b6]">
               <GraduationCap size={20} />
             </div>
             <div className="min-w-0">
@@ -234,45 +246,45 @@ export default function JourneyPage() {
             </div>
           </div>
 
-          <div className="flex h-11 min-w-11 items-center justify-center rounded-full border border-[#35794c]/15 bg-[#daf5e3] px-3 text-xs font-black text-[#176238] dark:border-[#8ce6ad]/15 dark:bg-[#8ce6ad]/12 dark:text-[#9af0b9]">
+          <div className="flex h-11 min-w-11 items-center justify-center rounded-full border border-white/65 bg-white/55 px-3 text-xs font-black text-[#2a7147] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#9af0b9]">
             {progress}%
           </div>
         </header>
 
-        <section className="mt-8 grid gap-5 lg:grid-cols-[1.25fr_.75fr]">
-          <div className="relative overflow-hidden rounded-[32px] bg-[#153f2a] p-6 text-white shadow-[0_30px_80px_rgba(20,63,42,0.16)] sm:p-8 dark:bg-[#0d2b1b]">
-            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full border border-white/10" />
-            <div className="pointer-events-none absolute -right-2 top-10 h-32 w-32 rounded-full bg-[#8ce6ad]/10 blur-2xl" />
+        <section className="mt-5 grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
+          <div className="relative overflow-hidden rounded-[32px] border border-white/55 bg-white/34 p-6 shadow-[0_28px_90px_rgba(16,46,28,0.11)] backdrop-blur-3xl sm:p-8 dark:border-white/[0.09] dark:bg-white/[0.045]">
+            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full border border-white/35" />
+            <div className="pointer-events-none absolute -right-2 top-10 h-32 w-32 rounded-full bg-[#8ce6ad]/18 blur-2xl" />
 
             <div className="relative z-10 max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-bold text-white/80">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/65 bg-white/45 px-3 py-1.5 text-xs font-bold text-[#2a6f47] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#9ae9b6]">
                 <Sparkles size={14} /> Fresher guide
               </div>
               <h1 className="mt-5 text-[38px] font-black leading-[0.95] tracking-[-0.055em] sm:text-[50px]">
                 Know what comes next.
               </h1>
-              <p className="mt-4 max-w-xl text-sm leading-6 text-white/65 sm:text-base sm:leading-7">
+              <p className="mt-4 max-w-xl text-sm leading-6 text-black/52 dark:text-white/50 sm:text-base sm:leading-7">
                 Keep your registration steps in one place and know what to do next.
               </p>
             </div>
 
-            <div className="relative z-10 mt-8">
-              <div className="mb-2 flex items-center justify-between text-xs font-bold text-white/65">
+            <div className="relative z-10 mt-8 rounded-[20px] border border-white/55 bg-white/35 p-4 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035]">
+              <div className="mb-2 flex items-center justify-between text-xs font-bold text-black/48 dark:text-white/48">
                 <span>{completedCount} of {steps.length} completed</span>
                 <span>{progress}%</span>
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
+              <div className="h-2.5 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
                 <div
-                  className="h-full rounded-full bg-[#9af0b9] transition-[width] duration-500"
+                  className="h-full rounded-full bg-[#65b886] transition-[width] duration-500 dark:bg-[#9af0b9]"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
           </div>
 
-          <aside className="rounded-[32px] border border-black/[0.055] bg-white/75 p-6 shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.045]">
+          <aside className="rounded-[32px] border border-white/55 bg-white/34 p-6 shadow-[0_24px_70px_rgba(16,46,28,0.09)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#e8f4ea] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-white/60 bg-white/50 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
                 <CheckCircle2 size={19} />
               </div>
               <div>
@@ -287,7 +299,7 @@ export default function JourneyPage() {
               href="https://firars.futa.edu.ng/app/welcome/appindex"
               target="_blank"
               rel="noreferrer"
-              className="mt-6 flex min-h-12 touch-manipulation items-center justify-between rounded-[18px] bg-[#102f20] px-4 text-sm font-black text-white transition active:scale-[0.98] dark:bg-[#8ce6ad] dark:text-[#082013]"
+              className="mt-6 flex min-h-12 touch-manipulation items-center justify-between rounded-[18px] border border-white/65 bg-white/58 px-4 text-sm font-black text-[#214f34] shadow-sm backdrop-blur-xl transition active:scale-[0.98] dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
             >
               FUTA student portal
               <ArrowUpRight size={17} />
@@ -316,7 +328,7 @@ export default function JourneyPage() {
               return (
                 <article
                   key={step.id}
-                  className="overflow-hidden rounded-[26px] border border-black/[0.055] bg-white/80 shadow-sm backdrop-blur-xl dark:border-white/[0.075] dark:bg-white/[0.045]"
+                  className="overflow-hidden rounded-[26px] border border-white/55 bg-white/38 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.075] dark:bg-white/[0.04]"
                 >
                   <div className="flex items-start gap-3 p-4 sm:p-5">
                     <button
@@ -324,14 +336,14 @@ export default function JourneyPage() {
                       onClick={() => cycleStatus(step.id)}
                       className={`mt-0.5 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-[15px] border transition active:scale-95 ${
                         status === "completed"
-                          ? "border-[#2f8554]/20 bg-[#dff5e7] text-[#1d6a3d] dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#9af0b9]"
+                          ? "border-[#2f8554]/20 bg-[#dff5e7]/85 text-[#1d6a3d] dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#9af0b9]"
                           : status === "in_progress"
-                            ? "border-[#d3a53b]/20 bg-[#fff3cf] text-[#8a6815] dark:border-[#e0c563]/20 dark:bg-[#e0c563]/10 dark:text-[#e0c563]"
-                            : "border-black/[0.06] bg-[#f5f5ef] text-black/30 dark:border-white/[0.07] dark:bg-white/[0.04] dark:text-white/30"
+                            ? "border-[#d3a53b]/20 bg-[#fff3cf]/80 text-[#8a6815] dark:border-[#e0c563]/20 dark:bg-[#e0c563]/10 dark:text-[#e0c563]"
+                            : "border-white/60 bg-white/48 text-black/30 dark:border-white/[0.07] dark:bg-white/[0.04] dark:text-white/30"
                       }`}
                       aria-label={`Change status for ${step.title}`}
                     >
-                      {status === "completed" ? <Check size={18} /> : status === "in_progress" ? <Circle size={17} /> : <Circle size={17} />}
+                      {status === "completed" ? <Check size={18} /> : <Circle size={17} />}
                     </button>
 
                     <button
@@ -341,16 +353,16 @@ export default function JourneyPage() {
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-black uppercase tracking-[0.13em] text-[#397950] dark:text-[#8ce6ad]">{step.eyebrow}</span>
-                        <span className="rounded-full bg-black/[0.035] px-2 py-1 text-[9px] font-bold text-black/38 dark:bg-white/[0.05] dark:text-white/35">{STATUS_LABELS[status]}</span>
+                        <span className="rounded-full border border-white/55 bg-white/35 px-2 py-1 text-[9px] font-bold text-black/40 backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.05] dark:text-white/35">{STATUS_LABELS[status]}</span>
                       </div>
                       <h3 className="mt-2 text-base font-black tracking-[-0.025em] sm:text-lg">{step.title}</h3>
-                      <p className="mt-1.5 text-sm leading-6 text-black/45 dark:text-white/40">{step.summary}</p>
+                      <p className="mt-1.5 text-sm leading-6 text-black/48 dark:text-white/42">{step.summary}</p>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setOpenStep(isOpen ? "" : step.id)}
-                      className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-black/35 transition dark:text-white/35 ${isOpen ? "rotate-180" : ""}`}
+                      className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/30 text-black/35 backdrop-blur-xl transition dark:border-white/[0.06] dark:bg-white/[0.04] dark:text-white/35 ${isOpen ? "rotate-180" : ""}`}
                       aria-label={isOpen ? "Close details" : "Open details"}
                     >
                       <ChevronDown size={18} />
@@ -358,7 +370,7 @@ export default function JourneyPage() {
                   </div>
 
                   {isOpen && (
-                    <div className="border-t border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] sm:px-5">
+                    <div className="border-t border-white/55 bg-white/12 px-4 pb-5 pt-4 backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.015] sm:px-5">
                       <div className="grid gap-5 lg:grid-cols-[1fr_.72fr]">
                         <div>
                           <p className="text-xs font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/30">What to do</p>
@@ -372,7 +384,7 @@ export default function JourneyPage() {
                           </ul>
 
                           {step.requirements && (
-                            <div className="mt-5 rounded-[20px] bg-[#f0eee4] p-4 dark:bg-white/[0.035]">
+                            <div className="mt-5 rounded-[20px] border border-white/55 bg-white/30 p-4 backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.03]">
                               <p className="text-xs font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/30">Documents to prepare</p>
                               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                                 {step.requirements.map((item) => (
@@ -387,12 +399,12 @@ export default function JourneyPage() {
                         </div>
 
                         <div className="space-y-3">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/45 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
                             <Icon size={19} />
                           </div>
 
                           {step.location && (
-                            <div className="rounded-[18px] border border-black/[0.05] p-4 dark:border-white/[0.06]">
+                            <div className="rounded-[18px] border border-white/55 bg-white/28 p-4 backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.025]">
                               <p className="text-[10px] font-black uppercase tracking-[0.11em] text-black/30 dark:text-white/28">Where</p>
                               <p className="mt-1.5 text-sm font-bold">{step.location}</p>
                             </div>
@@ -403,7 +415,7 @@ export default function JourneyPage() {
                               href={step.officialUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="flex min-h-12 items-center justify-between rounded-[17px] bg-[#153f2a] px-4 text-sm font-extrabold text-white dark:bg-[#8ce6ad] dark:text-[#092417]"
+                              className="flex min-h-12 items-center justify-between rounded-[17px] border border-white/65 bg-white/58 px-4 text-sm font-extrabold text-[#214f34] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
                             >
                               {step.officialLabel ?? "Open official link"}
                               <ArrowUpRight size={16} />
@@ -411,7 +423,7 @@ export default function JourneyPage() {
                           )}
 
                           {step.note && (
-                            <p className="rounded-[18px] bg-[#fff4cc] p-4 text-xs leading-5 text-[#6f5715] dark:bg-[#e0c563]/10 dark:text-[#e0c563]">{step.note}</p>
+                            <p className="rounded-[18px] border border-[#dfbe59]/20 bg-[#fff4cc]/70 p-4 text-xs leading-5 text-[#6f5715] backdrop-blur-xl dark:bg-[#e0c563]/10 dark:text-[#e0c563]">{step.note}</p>
                           )}
                         </div>
                       </div>
