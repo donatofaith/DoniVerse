@@ -42,6 +42,9 @@ type CommunityRecord = {
   is_verified: boolean;
 };
 
+const FUTA_CAMPUS_IMAGE =
+  "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
+
 export default function DiscoverPage() {
   const [view, setView] = useState<View>("events");
   const [query, setQuery] = useState("");
@@ -132,59 +135,74 @@ export default function DiscoverPage() {
   }, [communities, query]);
 
   return (
-    <main className="min-h-[100dvh] overflow-x-hidden bg-[#f4f3ed] pb-32 text-[#102017] dark:bg-[#061009] dark:text-white">
-      <div className="mx-auto w-full max-w-[1120px] px-4 pb-8 pt-5 sm:px-6 md:px-8 lg:px-10">
-        <header className="flex items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#397151] dark:text-[#8ce6ad]">
-              <Compass size={15} /> Discover FUTA
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#e9efe9] pb-32 text-[#102017] dark:bg-[#050b07] dark:text-white">
+      <div
+        className="pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.24] dark:opacity-[0.16]"
+        style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none fixed inset-0 bg-[linear-gradient(180deg,rgba(244,248,244,0.80)_0%,rgba(236,243,238,0.92)_40%,rgba(228,237,231,0.97)_100%)] dark:bg-[linear-gradient(180deg,rgba(5,11,7,0.72)_0%,rgba(5,11,7,0.90)_42%,rgba(5,11,7,0.97)_100%)]"
+        aria-hidden="true"
+      />
+      <div className="pointer-events-none fixed -right-24 top-16 h-72 w-72 rounded-full bg-[#8fddb0]/25 blur-[110px]" aria-hidden="true" />
+      <div className="pointer-events-none fixed -left-24 bottom-20 h-72 w-72 rounded-full bg-[#e4c469]/18 blur-[120px]" aria-hidden="true" />
+
+      <div className="relative mx-auto w-full max-w-[1120px] px-4 pb-8 pt-5 sm:px-6 md:px-8 lg:px-10">
+        <header className="rounded-[28px] border border-white/60 bg-white/38 p-5 shadow-[0_20px_60px_rgba(16,46,28,0.08)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04] sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#397151] dark:text-[#8ce6ad]">
+                <Compass size={15} /> Discover FUTA
+              </div>
+              <h1 className="mt-2 text-[36px] font-black leading-none tracking-[-0.055em] sm:text-[48px]">
+                What&apos;s happening,
+                <span className="block text-[#34744c] dark:text-[#8ce6ad]">around campus.</span>
+              </h1>
             </div>
-            <h1 className="mt-2 text-[36px] font-black leading-none tracking-[-0.055em] sm:text-[48px]">
-              What&apos;s happening,
-              <span className="block text-[#34744c] dark:text-[#8ce6ad]">around campus.</span>
-            </h1>
+
+            <div className="hidden h-12 w-12 items-center justify-center rounded-[17px] border border-white/60 bg-white/46 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#9bedb7] sm:flex">
+              <Sparkles size={21} />
+            </div>
           </div>
-          <div className="hidden h-12 w-12 items-center justify-center rounded-[17px] bg-[#153f2a] text-[#9bedb7] shadow-lg sm:flex">
-            <Sparkles size={21} />
+
+          <p className="mt-4 max-w-[650px] text-sm leading-6 text-black/48 dark:text-white/42 sm:text-[15px]">
+            See what&apos;s happening around campus and find communities you can join.
+          </p>
+
+          <div className="mt-5 inline-flex rounded-[18px] border border-white/60 bg-white/34 p-1.5 shadow-sm backdrop-blur-2xl dark:border-white/[0.08] dark:bg-white/[0.04]">
+            {(["events", "communities"] as View[]).map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setView(item)}
+                className={`min-h-11 touch-manipulation rounded-[13px] px-5 text-sm font-extrabold capitalize transition ${
+                  view === item
+                    ? "border border-white/65 bg-white/60 text-[#214f34] shadow-sm dark:border-white/[0.08] dark:bg-white/[0.08] dark:text-white"
+                    : "text-black/42 dark:text-white/42"
+                }`}
+              >
+                {item}
+              </button>
+            ))}
           </div>
         </header>
 
-        <p className="mt-4 max-w-[650px] text-sm leading-6 text-black/48 dark:text-white/42 sm:text-[15px]">
-          See what&apos;s happening around campus and find communities you can join.
-        </p>
-
-        <div className="mt-6 inline-flex rounded-[18px] border border-black/[0.055] bg-white/70 p-1.5 dark:border-white/[0.07] dark:bg-white/[0.035]">
-          {(["events", "communities"] as View[]).map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setView(item)}
-              className={`min-h-11 touch-manipulation rounded-[13px] px-5 text-sm font-extrabold capitalize transition ${
-                view === item
-                  ? "bg-[#153f2a] text-white shadow-sm dark:bg-[#8ce6ad] dark:text-[#092417]"
-                  : "text-black/42 dark:text-white/42"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-
         {view === "events" ? (
           <>
-            <section className="mt-6 overflow-hidden rounded-[30px] bg-[#123f29] p-5 text-white shadow-[0_24px_70px_rgba(18,63,41,0.16)] sm:p-7">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#a9efc1]">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#9bedb7]" /> Campus pulse
+            <section className="mt-5 overflow-hidden rounded-[30px] border border-white/55 bg-white/32 p-5 shadow-[0_24px_70px_rgba(16,46,28,0.10)] backdrop-blur-3xl sm:p-7 dark:border-white/[0.08] dark:bg-white/[0.04]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/38 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#2d6d47] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#a9efc1]">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#65b886] dark:bg-[#9bedb7]" /> Campus pulse
               </div>
               <h2 className="mt-4 max-w-[560px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">
                 Don&apos;t miss what&apos;s happening at FUTA.
               </h2>
-              <p className="mt-3 max-w-[610px] text-sm leading-6 text-white/58">
+              <p className="mt-3 max-w-[610px] text-sm leading-6 text-black/50 dark:text-white/48">
                 See what&apos;s happening now, what&apos;s on this week and what&apos;s coming next.
               </p>
               <a
                 href="#upcoming"
-                className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-[16px] bg-[#9bedb7] px-5 text-sm font-extrabold text-[#0b2b1b]"
+                className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-[16px] border border-white/65 bg-white/58 px-5 text-sm font-extrabold text-[#214f34] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
               >
                 See upcoming <ArrowRight size={17} />
               </a>
@@ -196,7 +214,7 @@ export default function DiscoverPage() {
               <UnavailableCard label="events" />
             ) : (
               <>
-                <section className="mt-6 grid gap-4 md:grid-cols-2">
+                <section className="mt-5 grid gap-4 md:grid-cols-2">
                   <EventGroupCard
                     eyebrow="Happening now"
                     title={
@@ -249,7 +267,7 @@ export default function DiscoverPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-[26px] border border-dashed border-black/10 bg-white/40 p-7 text-center dark:border-white/10 dark:bg-white/[0.02]">
+                    <div className="rounded-[26px] border border-dashed border-white/60 bg-white/28 p-7 text-center backdrop-blur-2xl dark:border-white/[0.08] dark:bg-white/[0.025]">
                       <CalendarDays size={22} className="mx-auto text-black/25 dark:text-white/25" />
                       <p className="mt-3 text-sm font-black">No upcoming events right now.</p>
                       <p className="mt-1 text-xs text-black/38 dark:text-white/32">Check back soon for what&apos;s next around campus.</p>
@@ -260,16 +278,18 @@ export default function DiscoverPage() {
             )}
           </>
         ) : (
-          <section className="mt-6">
-            <div className="rounded-[28px] bg-[#173f2b] p-5 text-white sm:p-6">
-              <Users size={22} className="text-[#9bedb7]" />
+          <section className="mt-5">
+            <div className="rounded-[28px] border border-white/55 bg-white/32 p-5 shadow-[0_22px_65px_rgba(16,46,28,0.09)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04] sm:p-6">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#9bedb7]">
+                <Users size={22} />
+              </div>
               <h2 className="mt-5 text-[27px] font-black tracking-[-0.045em]">Find your people.</h2>
-              <p className="mt-2 max-w-[620px] text-sm leading-6 text-white/58">
+              <p className="mt-2 max-w-[620px] text-sm leading-6 text-black/50 dark:text-white/48">
                 Student associations, fellowships, academic groups, clubs, creative communities and more.
               </p>
             </div>
 
-            <div className="mt-5 flex min-h-[58px] items-center gap-3 rounded-[20px] border border-black/[0.055] bg-white/80 px-4 dark:border-white/[0.07] dark:bg-white/[0.045]">
+            <div className="mt-4 flex min-h-[58px] items-center gap-3 rounded-[20px] border border-white/60 bg-white/40 px-4 shadow-sm backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
               <Search size={18} className="shrink-0 text-black/35 dark:text-white/35" />
               <input
                 value={query}
@@ -290,7 +310,7 @@ export default function DiscoverPage() {
                 ))}
               </div>
             ) : (
-              <div className="mt-5 rounded-[24px] border border-dashed border-black/10 p-8 text-center dark:border-white/10">
+              <div className="mt-5 rounded-[24px] border border-dashed border-white/60 bg-white/26 p-8 text-center backdrop-blur-2xl dark:border-white/[0.08] dark:bg-white/[0.025]">
                 <Users size={22} className="mx-auto text-black/25 dark:text-white/25" />
                 <p className="mt-3 text-sm font-bold">No community matches that search.</p>
               </div>
@@ -318,19 +338,13 @@ function EventGroupCard({
   const green = accent === "green";
 
   return (
-    <article
-      className={`rounded-[26px] border p-5 ${
-        green
-          ? "border-[#2e7048]/15 bg-[#e8f0e7] dark:border-[#8ce6ad]/10 dark:bg-[#102318]"
-          : "border-black/[0.055] bg-white/70 dark:border-white/[0.07] dark:bg-white/[0.035]"
-      }`}
-    >
+    <article className="rounded-[26px] border border-white/55 bg-white/34 p-5 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
       <div className="flex items-start gap-4">
         <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] ${
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 shadow-sm backdrop-blur-xl ${
             green
-              ? "bg-white/80 text-[#34744c] dark:bg-white/[0.07] dark:text-[#8ce6ad]"
-              : "bg-[#eee9dc] text-[#7b6424] dark:bg-[#e0c563]/10 dark:text-[#e0c563]"
+              ? "text-[#34744c] dark:text-[#8ce6ad]"
+              : "text-[#7b6424] dark:text-[#e0c563]"
           }`}
         >
           {icon}
@@ -376,9 +390,9 @@ function EventCard({ event }: { event: EventRecord }) {
     : null;
 
   return (
-    <article className="rounded-[26px] border border-black/[0.055] bg-white/75 p-5 shadow-[0_12px_35px_rgba(28,58,39,0.04)] dark:border-white/[0.07] dark:bg-white/[0.035]">
+    <article className="rounded-[26px] border border-white/55 bg-white/36 p-5 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-[#e9f3ea] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#397151] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+        <span className="rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#397151] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]">
           {event.event_type}
         </span>
         {event.is_featured && (
@@ -408,7 +422,7 @@ function EventCard({ event }: { event: EventRecord }) {
         )}
       </div>
 
-      <div className="mt-5 flex items-end justify-between gap-3 border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
+      <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/55 pt-4 dark:border-white/[0.06]">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.1em] text-black/30 dark:text-white/28">Organiser</p>
           <p className="mt-1 text-xs font-bold">{event.organizer_name}</p>
@@ -418,7 +432,7 @@ function EventCard({ event }: { event: EventRecord }) {
             href={event.official_url}
             target="_blank"
             rel="noreferrer"
-            className="flex min-h-10 items-center gap-2 rounded-[14px] bg-[#153f2a] px-3 text-xs font-extrabold text-white dark:bg-[#8ce6ad] dark:text-[#092417]"
+            className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/48 px-3 text-xs font-extrabold text-[#214f34] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
           >
             More info <ExternalLink size={13} />
           </a>
@@ -432,8 +446,8 @@ function CommunityCard({ community }: { community: CommunityRecord }) {
   const destination = community.official_url || community.contact_url;
 
   return (
-    <article className="rounded-[26px] border border-black/[0.05] bg-white/72 p-5 dark:border-white/[0.07] dark:bg-white/[0.035]">
-      <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+    <article className="rounded-[26px] border border-white/55 bg-white/34 p-5 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
+      <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#8ce6ad]">
         <Users size={19} />
       </div>
       <p className="mt-5 text-[10px] font-black uppercase tracking-[0.11em] text-[#397151] dark:text-[#8ce6ad]">{community.category}</p>
@@ -462,7 +476,7 @@ function CommunityCard({ community }: { community: CommunityRecord }) {
 
 function LoadingCard({ label }: { label: string }) {
   return (
-    <div className="mt-6 flex min-h-[120px] items-center justify-center gap-3 rounded-[24px] border border-black/[0.05] bg-white/55 text-sm font-bold text-black/45 dark:border-white/[0.06] dark:bg-white/[0.025] dark:text-white/40">
+    <div className="mt-6 flex min-h-[120px] items-center justify-center gap-3 rounded-[24px] border border-white/55 bg-white/28 text-sm font-bold text-black/45 shadow-sm backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-white/40">
       <LoaderCircle size={18} className="animate-spin" /> {label}
     </div>
   );
@@ -470,7 +484,7 @@ function LoadingCard({ label }: { label: string }) {
 
 function UnavailableCard({ label }: { label: "events" | "communities" }) {
   return (
-    <div className="mt-6 rounded-[24px] border border-black/[0.05] bg-white/55 p-6 text-center dark:border-white/[0.06] dark:bg-white/[0.025]">
+    <div className="mt-6 rounded-[24px] border border-white/55 bg-white/28 p-6 text-center shadow-sm backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.03]">
       <p className="text-sm font-black">We couldn&apos;t load {label} right now.</p>
       <p className="mt-2 text-xs leading-5 text-black/38 dark:text-white/32">Check your connection and try again in a moment.</p>
     </div>
