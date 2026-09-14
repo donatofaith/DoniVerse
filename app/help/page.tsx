@@ -84,31 +84,37 @@ const supportAreas: SupportArea[] = [
 
 export default function HelpPage() {
   return (
-    <main className="min-h-[100dvh] overflow-x-hidden bg-[#f4f3ed] pb-32 text-[#102017] dark:bg-[#061009] dark:text-white">
-      <div className="mx-auto w-full max-w-[1120px] px-4 pb-8 pt-5 sm:px-6 md:px-8 lg:px-10">
-        <header className="flex items-center justify-between gap-4">
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#edf2ed] pb-32 text-[#102017] dark:bg-[#050b07] dark:text-white">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -right-28 top-[-70px] h-[330px] w-[330px] rounded-full bg-[#78d89b]/20 blur-[110px] dark:bg-[#78d89b]/10" />
+        <div className="absolute -left-32 top-[520px] h-[360px] w-[360px] rounded-full bg-[#e8c75e]/15 blur-[120px] dark:bg-[#e8c75e]/[0.06]" />
+        <div className="absolute bottom-0 right-[20%] h-[300px] w-[300px] rounded-full bg-[#5a9f78]/10 blur-[120px]" />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-[1120px] px-4 pb-8 pt-5 sm:px-6 md:px-8 lg:px-10">
+        <header className="flex items-center justify-between gap-4 rounded-[26px] border border-white/50 bg-white/45 p-4 shadow-[0_18px_55px_rgba(20,63,42,0.08)] backdrop-blur-[24px] dark:border-white/[0.08] dark:bg-white/[0.035] sm:p-5">
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#397151] dark:text-[#8ce6ad]">
               <HeartHandshake size={15} /> Help
             </div>
-            <h1 className="mt-2 text-[36px] font-black leading-none tracking-[-0.055em] sm:text-[48px]">
+            <h1 className="mt-2 text-[34px] font-black leading-none tracking-[-0.055em] sm:text-[46px]">
               Need help?
               <span className="block text-[#34744c] dark:text-[#8ce6ad]">Someone can help.</span>
             </h1>
+            <p className="mt-3 max-w-[660px] text-sm leading-6 text-black/48 dark:text-white/42 sm:text-[15px]">
+              Find the right campus contact for urgent assistance, student support or official university help.
+            </p>
           </div>
-          <div className="hidden h-12 w-12 items-center justify-center rounded-[17px] bg-[#153f2a] text-[#9bedb7] shadow-lg sm:flex">
+
+          <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-[17px] border border-white/25 bg-[#153f2a]/95 text-[#9bedb7] shadow-lg backdrop-blur-xl sm:flex">
             <CircleHelp size={21} />
           </div>
         </header>
 
-        <p className="mt-4 max-w-[660px] text-sm leading-6 text-black/48 dark:text-white/42 sm:text-[15px]">
-          Find the right campus contact for urgent assistance, student support or official university help.
-        </p>
-
-        <section className="mt-7 overflow-hidden rounded-[30px] bg-[#123f29] p-5 text-white shadow-[0_24px_70px_rgba(18,63,41,0.16)] sm:p-7">
+        <section className="mt-5 overflow-hidden rounded-[30px] border border-white/12 bg-[#103d28]/94 p-5 text-white shadow-[0_28px_80px_rgba(18,63,41,0.22)] backdrop-blur-2xl sm:p-7">
           <div className="grid gap-6 lg:grid-cols-[1fr_.72fr] lg:items-end">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#a9efc1]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#a9efc1] backdrop-blur-xl">
                 <UsersRound size={14} /> Campus support
               </div>
               <h2 className="mt-4 max-w-[590px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">
@@ -119,7 +125,7 @@ export default function HelpPage() {
               </p>
             </div>
 
-            <div className="rounded-[20px] border border-white/10 bg-white/[0.06] p-4">
+            <div className="rounded-[22px] border border-white/12 bg-white/[0.08] p-4 shadow-inner backdrop-blur-xl">
               <p className="text-xs font-black uppercase tracking-[0.12em] text-[#9bedb7]">Support network</p>
               <p className="mt-2 text-sm leading-6 text-white/65">
                 Support contacts will be assigned by school or faculty so students can reach someone familiar with their area.
@@ -128,13 +134,13 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <section className="mt-6 grid gap-3 md:grid-cols-3">
+        <section className="mt-5 grid gap-3 md:grid-cols-3">
           {supportAreas.map((area) => (
             <article
               key={area.title}
-              className="rounded-[26px] border border-black/[0.055] bg-white/72 p-5 dark:border-white/[0.07] dark:bg-white/[0.035]"
+              className="rounded-[26px] border border-white/55 bg-white/48 p-5 shadow-[0_14px_42px_rgba(20,63,42,0.07)] backdrop-blur-[24px] dark:border-white/[0.075] dark:bg-white/[0.035] dark:shadow-none"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/62 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
                 <UserRoundSearch size={19} />
               </div>
               <h3 className="mt-4 text-lg font-black tracking-[-0.03em]">{area.title}</h3>
@@ -147,7 +153,7 @@ export default function HelpPage() {
           ))}
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-[30px] border border-[#b4472c]/10 bg-[#fff4ed] shadow-[0_18px_50px_rgba(116,52,35,0.06)] dark:border-[#ff9b76]/10 dark:bg-[#29130e]">
+        <section className="mt-5 overflow-hidden rounded-[30px] border border-[#b4472c]/12 bg-[#fff4ed]/72 shadow-[0_20px_60px_rgba(116,52,35,0.09)] backdrop-blur-[24px] dark:border-[#ff9b76]/10 dark:bg-[#29130e]/72">
           <div className="border-b border-[#b4472c]/10 p-5 sm:p-6 dark:border-[#ff9b76]/10">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-[#b4472c] text-white shadow-[0_10px_28px_rgba(180,71,44,0.22)]">
@@ -169,13 +175,13 @@ export default function HelpPage() {
 
           <div className="grid gap-px bg-[#b4472c]/10 dark:bg-[#ff9b76]/10 md:grid-cols-2 lg:grid-cols-3">
             {emergencyContacts.map((contact) => (
-              <article key={contact.role} className="bg-[#fffaf6] p-5 dark:bg-[#160d0a]">
+              <article key={contact.role} className="bg-white/58 p-5 backdrop-blur-xl dark:bg-[#160d0a]/75">
                 <div className="flex items-start justify-between gap-3">
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${
                       contact.priority === "emergency"
                         ? "bg-[#b4472c] text-white"
-                        : "bg-[#f4dfd5] text-[#93472f] dark:bg-[#ff9b76]/10 dark:text-[#ff9b76]"
+                        : "bg-[#f4dfd5]/85 text-[#93472f] dark:bg-[#ff9b76]/10 dark:text-[#ff9b76]"
                     }`}
                   >
                     {contact.priority === "emergency" ? (
@@ -188,7 +194,7 @@ export default function HelpPage() {
                   <a
                     href={`tel:${contact.number}`}
                     aria-label={`Call ${contact.role}`}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#153f2a] text-white transition active:scale-95 dark:bg-[#8ce6ad] dark:text-[#092417]"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#153f2a] text-white shadow-lg transition active:scale-95 dark:bg-[#8ce6ad] dark:text-[#092417]"
                   >
                     <Phone size={16} />
                   </a>
@@ -209,7 +215,7 @@ export default function HelpPage() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[28px] border border-black/[0.055] bg-white/72 p-5 dark:border-white/[0.07] dark:bg-white/[0.035] sm:p-6">
+        <section className="mt-5 rounded-[28px] border border-white/55 bg-white/48 p-5 shadow-[0_14px_42px_rgba(20,63,42,0.07)] backdrop-blur-[24px] dark:border-white/[0.07] dark:bg-white/[0.035] dark:shadow-none sm:p-6">
           <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#397151] dark:text-[#8ce6ad]">
@@ -225,16 +231,16 @@ export default function HelpPage() {
               href="https://helpdesk.futa.edu.ng/undergraduate"
               target="_blank"
               rel="noreferrer"
-              className="flex min-h-12 touch-manipulation items-center justify-center gap-2 rounded-[16px] bg-[#153f2a] px-5 text-sm font-extrabold text-white transition active:scale-[0.98] dark:bg-[#8ce6ad] dark:text-[#092417]"
+              className="flex min-h-12 touch-manipulation items-center justify-center gap-2 rounded-[16px] bg-[#153f2a] px-5 text-sm font-extrabold text-white shadow-lg transition active:scale-[0.98] dark:bg-[#8ce6ad] dark:text-[#092417]"
             >
               Official FUTA help <ExternalLink size={16} />
             </a>
           </div>
         </section>
 
-        <section className="mt-6 rounded-[24px] border border-black/[0.05] bg-white/55 p-5 dark:border-white/[0.06] dark:bg-white/[0.025]">
+        <section className="mt-5 rounded-[24px] border border-white/50 bg-white/38 p-5 backdrop-blur-[22px] dark:border-white/[0.06] dark:bg-white/[0.025]">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#fff2c8] text-[#806315] dark:bg-[#e0c563]/10 dark:text-[#e0c563]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#fff2c8]/85 text-[#806315] dark:bg-[#e0c563]/10 dark:text-[#e0c563]">
               <WifiOff size={18} />
             </div>
             <div>
