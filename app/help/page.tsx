@@ -10,8 +10,11 @@ import {
   Landmark,
   LifeBuoy,
   MapPin,
+  Phone,
   Search,
+  ShieldAlert,
   ShieldCheck,
+  Siren,
   UserRoundSearch,
   WifiOff,
 } from "lucide-react";
@@ -26,6 +29,13 @@ type HelpTopic = {
   actionLabel: string;
   actionType: "official" | "explore" | "journey";
   href?: string;
+};
+
+type EmergencyContact = {
+  role: string;
+  number: string;
+  description: string;
+  priority?: "emergency" | "support";
 };
 
 const helpTopics: HelpTopic[] = [
@@ -65,6 +75,45 @@ const helpTopics: HelpTopic[] = [
     icon: MapPin,
     actionLabel: "Open campus map",
     actionType: "explore",
+  },
+];
+
+const emergencyContacts: EmergencyContact[] = [
+  {
+    role: "FUTASU President",
+    number: "09019499320",
+    description: "Students' Union leadership and urgent student matters.",
+    priority: "support",
+  },
+  {
+    role: "FUTASU P.R.O",
+    number: "09018556305",
+    description: "Students' Union information and communication support.",
+    priority: "support",
+  },
+  {
+    role: "FUTASU Welfare Director",
+    number: "08097536360",
+    description: "Student welfare concerns and urgent welfare assistance.",
+    priority: "support",
+  },
+  {
+    role: "Chief Security Officer",
+    number: "08034169128",
+    description: "Security incidents, threats and urgent safety concerns on campus.",
+    priority: "emergency",
+  },
+  {
+    role: "Deputy CSO",
+    number: "08162700524",
+    description: "Campus security support when urgent assistance is needed.",
+    priority: "emergency",
+  },
+  {
+    role: "Ambulance",
+    number: "07048091168",
+    description: "Medical emergencies requiring urgent campus ambulance assistance.",
+    priority: "emergency",
   },
 ];
 
@@ -130,7 +179,7 @@ export default function HelpPage() {
         </header>
 
         <p className="mt-4 max-w-[660px] text-sm leading-6 text-black/48 dark:text-white/42 sm:text-[15px]">
-          Start here when you need help with registration, the portal, finding an office or moving around campus.
+          Start here when you need urgent assistance, help with registration, the portal, finding an office or moving around campus.
         </p>
 
         <section className="mt-7 overflow-hidden rounded-[30px] bg-[#123f29] p-5 text-white shadow-[0_24px_70px_rgba(18,63,41,0.16)] sm:p-7">
@@ -156,6 +205,63 @@ export default function HelpPage() {
               Open official FUTA helpdesk
               <ExternalLink size={16} />
             </a>
+          </div>
+        </section>
+
+        <section className="mt-6 overflow-hidden rounded-[30px] border border-[#b4472c]/10 bg-[#fff4ed] shadow-[0_18px_50px_rgba(116,52,35,0.06)] dark:border-[#ff9b76]/10 dark:bg-[#29130e]">
+          <div className="border-b border-[#b4472c]/10 p-5 sm:p-6 dark:border-[#ff9b76]/10">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-[#b4472c] text-white shadow-[0_10px_28px_rgba(180,71,44,0.22)]">
+                <Siren size={21} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.13em] text-[#a34a32] dark:text-[#ff9b76]">
+                  Important campus contacts
+                </p>
+                <h2 className="mt-1 text-[22px] font-black tracking-[-0.035em] sm:text-[26px]">
+                  Numbers every FUTARIAN should keep close.
+                </h2>
+                <p className="mt-2 max-w-[760px] text-sm leading-6 text-black/48 dark:text-white/42">
+                  For emergencies, security matters, welfare concerns and urgent assistance on campus. Tap any number to call directly.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-px bg-[#b4472c]/10 dark:bg-[#ff9b76]/10 md:grid-cols-2 lg:grid-cols-3">
+            {emergencyContacts.map((contact) => (
+              <article key={contact.role} className="bg-[#fffaf6] p-5 dark:bg-[#160d0a]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${contact.priority === "emergency" ? "bg-[#b4472c] text-white" : "bg-[#f4dfd5] text-[#93472f] dark:bg-[#ff9b76]/10 dark:text-[#ff9b76]"}`}>
+                    {contact.priority === "emergency" ? <ShieldAlert size={18} /> : <UserRoundSearch size={18} />}
+                  </div>
+                  <a
+                    href={`tel:${contact.number}`}
+                    aria-label={`Call ${contact.role}`}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#153f2a] text-white transition active:scale-95 dark:bg-[#8ce6ad] dark:text-[#092417]"
+                  >
+                    <Phone size={16} />
+                  </a>
+                </div>
+                <p className="mt-4 text-sm font-black tracking-[-0.02em]">{contact.role}</p>
+                <a
+                  href={`tel:${contact.number}`}
+                  className="mt-1 inline-block text-xl font-black tracking-[-0.025em] text-[#173f2b] dark:text-[#9bedb7]"
+                >
+                  {contact.number}
+                </a>
+                <p className="mt-2 text-xs leading-5 text-black/42 dark:text-white/36">
+                  {contact.description}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          <div className="flex items-start gap-3 bg-[#f7e8df] px-5 py-4 dark:bg-[#ff9b76]/[0.05] sm:px-6">
+            <ShieldCheck size={16} className="mt-0.5 shrink-0 text-[#93472f] dark:text-[#ff9b76]" />
+            <p className="text-[11px] leading-5 text-black/42 dark:text-white/35">
+              These contacts are listed from a FUTASU Students&apos; Union emergency contact notice. Contact information can change, so FUTAGO should update this list whenever the Students&apos; Union publishes a newer notice.
+            </p>
           </div>
         </section>
 
