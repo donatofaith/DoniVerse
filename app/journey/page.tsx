@@ -3,20 +3,16 @@
 import {
   ArrowLeft,
   ArrowUpRight,
-  BadgeCheck,
   BookOpenCheck,
   Check,
   CheckCircle2,
   ChevronDown,
   Circle,
-  Clock3,
-  ExternalLink,
   FileCheck2,
   FileText,
   GraduationCap,
   Landmark,
   MapPin,
-  Navigation,
   ShieldCheck,
   Sparkles,
   WalletCards,
@@ -60,11 +56,11 @@ const steps: JourneyStep[] = [
     eyebrow: "Step 01",
     title: "Confirm acceptance and access the student portal",
     summary:
-      "Make sure your acceptance fee has been confirmed, then create or access your FUTA student account with your UTME details.",
+      "Confirm your acceptance fee, then create or access your FUTA student account with your admission details.",
     details: [
-      "FUTA's fresher registration procedure asks new students to verify that their acceptance fee has been paid and confirmed before account creation.",
-      "Use your own active email address and phone number on official FUTA systems because the university may use them for important communication.",
-      "Keep your portal password private. FUTAGO will never ask for your FUTA portal password.",
+      "Make sure your acceptance fee has been paid and confirmed before moving on.",
+      "Use an active email address and phone number you can access easily.",
+      "Keep your portal password private and never share it with anyone offering to register for you.",
     ],
     officialUrl: "https://firars.futa.edu.ng/app/welcome/appindex",
     officialLabel: "Open FUTA student portal",
@@ -73,13 +69,13 @@ const steps: JourneyStep[] = [
   {
     id: "biodata",
     eyebrow: "Step 02",
-    title: "Complete your registration data carefully",
+    title: "Complete your registration details",
     summary:
-      "Fill the required student data forms on the official FUTA portal and review every entry before final submission.",
+      "Fill in the required student information on the FUTA portal and check every detail before submitting.",
     details: [
-      "Enter your personal and admission information exactly as required by FUTA.",
-      "Check spellings, dates and uploaded information before moving forward.",
-      "Do not mark this FUTAGO step complete until you have actually completed the corresponding action on FUTA's official system.",
+      "Enter your personal and admission information exactly as required.",
+      "Check names, dates and other details carefully before moving forward.",
+      "Mark this step complete after you have finished the corresponding action on the official portal.",
     ],
     officialUrl: "https://firars.futa.edu.ng/app/welcome/appindex",
     officialLabel: "Continue on FUTA portal",
@@ -90,84 +86,84 @@ const steps: JourneyStep[] = [
     eyebrow: "Step 03",
     title: "Prepare your fresher documents",
     summary:
-      "Gather the documents FUTA lists for fresh-student registration and make sure your digital copies are clear and correctly prepared.",
+      "Get your registration documents ready and make sure any digital copies are clear and easy to read.",
     requirements: [
       "Birth certificate",
       "Certificate of origin",
-      "Court affidavit where required by the current portal procedure",
+      "Court affidavit where required",
       "Attestation letter",
       "Passport photograph",
       "O'Level result(s)",
       "JAMB admission letter where applicable",
-      "For Direct Entry: the relevant ND/NCE/IJMB/JUPEB/A'Level result",
+      "For Direct Entry: relevant ND/NCE/IJMB/JUPEB/A'Level result",
     ],
     details: [
-      "The official registration procedure has historically required scanned image uploads for key documents, so follow the file type and size shown on the current portal.",
-      "If your portal instruction differs from an older FUTA notice, follow the current official portal instruction.",
+      "Follow the file type and size shown on the current FUTA portal when uploading documents.",
+      "If the portal gives a newer instruction, follow the instruction shown there.",
     ],
     officialUrl: "https://studentportal.futa.edu.ng/home/news/263",
-    officialLabel: "View FUTA registration procedure",
+    officialLabel: "View registration procedure",
     icon: FileCheck2,
-    note: "Requirements can change by session. Always confirm the latest instruction on the official FUTA portal before uploading.",
+    note: "Document requirements can change by session. Check the current portal before uploading.",
   },
   {
     id: "finalise-screening",
     eyebrow: "Step 04",
-    title: "Finalise submission and check your screening remark",
+    title: "Finalise your submission and check screening",
     summary:
-      "After reviewing your forms and uploads, finalise the official submission and check the screening result or remark shown by FUTA.",
+      "Review your forms and uploads, submit them, then check the screening result shown on the official portal.",
     details: [
-      "Review your official registration details before finalising because some information may become harder to edit afterwards.",
-      "Keep a copy of any preview, report or acknowledgement page the portal provides.",
-      "FUTAGO cannot see or verify your screening status unless FUTA provides an authorised integration in the future.",
+      "Review your registration details carefully before final submission.",
+      "Keep a copy of any acknowledgement, report or preview page you receive.",
+      "Check your screening result directly on the official FUTA portal.",
     ],
     officialUrl: "https://firars.futa.edu.ng/app/welcome/appindex",
-    officialLabel: "Check official portal",
+    officialLabel: "Check screening status",
     icon: ShieldCheck,
   },
   {
     id: "school-fees",
     eyebrow: "Step 05",
-    title: "Pay and confirm school fees when eligible",
+    title: "Pay and confirm school fees",
     summary:
-      "Once FUTA says you are eligible to proceed, follow the payment instructions generated from your official student profile and confirm the payment on the portal.",
+      "When you are eligible to proceed, follow the payment instructions shown on your official student profile.",
     details: [
-      "Use only payment instructions generated through FUTA's official systems.",
+      "Use only payment instructions generated through official FUTA systems.",
       "Keep your payment evidence and confirmation details.",
-      "Do not send money to anyone claiming they can complete FUTA registration privately for you.",
+      "Do not send money to anyone claiming they can privately complete registration for you.",
     ],
     officialUrl: "https://firars.futa.edu.ng/app/welcome/appindex",
-    officialLabel: "Open official payment portal",
+    officialLabel: "Open payment portal",
     icon: WalletCards,
   },
   {
     id: "course-registration",
     eyebrow: "Step 06",
-    title: "Complete course registration and approval",
+    title: "Complete course registration",
     summary:
-      "Register the courses shown for your session, print the registration form and follow FUTA's approval and endorsement process.",
+      "Register your courses, print the required form and complete any approval or endorsement steps for your level.",
     details: [
-      "FUTA's current portal information says course registration depends on confirmed school-fee payment for the relevant session or semester.",
-      "Fresh students should select the displayed courses, submit and print the course registration form.",
-      "The printed form is then presented to the appropriate Level Registration Office for approval, followed by the required endorsement and departmental submission.",
+      "Course registration may depend on confirmed school-fee payment for the session or semester.",
+      "Select the courses shown for you, submit them and print the registration form where required.",
+      "Take the printed form to the appropriate registration office or department if instructed to do so.",
     ],
     officialUrl: "https://firarsapp.futa.edu.ng/apps/applications",
-    officialLabel: "Read official course-registration guidance",
+    officialLabel: "View course registration",
     location: "Your Level Registration Office / Department",
     icon: BookOpenCheck,
   },
   {
     id: "campus-followup",
     eyebrow: "Step 07",
-    title: "Handle any required campus follow-up",
+    title: "Complete any campus follow-up",
     summary:
-      "Use FUTAGO Explore to find the department, Student Affairs or another campus office when an official FUTA instruction requires an in-person visit.",
+      "If you are asked to visit a department or office, check the instruction you were given and go with the documents you need.",
     details: [
-      "Not every student will need the same physical follow-up, so use the instruction shown on your official portal or given by the relevant FUTA office.",
-      "For portal or registration problems, use FUTA's official support channels rather than relying on unverified messages.",
+      "Your required follow-up may differ from another student's, so use the instruction on your portal or from the relevant office.",
+      "If you need help understanding where to go or what to take along, use the Help section for campus support.",
     ],
     officialUrl: "https://helpdesk.futa.edu.ng/undergraduate",
-    officialLabel: "Open FUTA undergraduate helpdesk",
+    officialLabel: "Official FUTA help",
     location: "FUTA campus",
     icon: MapPin,
   },
@@ -183,11 +179,10 @@ export default function JourneyPage() {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as Record<string, StepStatus>;
-        setStatuses(parsed);
+        setStatuses(JSON.parse(stored) as Record<string, StepStatus>);
       }
     } catch {
-      // Ignore malformed or unavailable local storage and use defaults.
+      // Use default progress when local storage is unavailable.
     } finally {
       setReady(true);
     }
@@ -198,36 +193,32 @@ export default function JourneyPage() {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(statuses));
     } catch {
-      // Progress still works for the current session if storage is unavailable.
+      // Keep the current-session progress if storage is unavailable.
     }
   }, [ready, statuses]);
 
   const completedCount = useMemo(
-    () =>
-      steps.filter((step) => (statuses[step.id] ?? "not_started") === "completed")
-        .length,
-    [statuses]
+    () => steps.filter((step) => (statuses[step.id] ?? "not_started") === "completed").length,
+    [statuses],
   );
 
   const progress = Math.round((completedCount / steps.length) * 100);
 
-  const setStatus = (id: string, status: StepStatus) => {
-    setStatuses((current) => ({ ...current, [id]: status }));
-  };
-
   const cycleStatus = (id: string) => {
-    const current = statuses[id] ?? "not_started";
-    setStatus(id, NEXT_STATUS[current]);
+    setStatuses((current) => {
+      const status = current[id] ?? "not_started";
+      return { ...current, [id]: NEXT_STATUS[status] };
+    });
   };
 
   return (
-    <main className="min-h-[100dvh] overflow-x-hidden bg-[#f3f3ed] text-[#102017] dark:bg-[#061009] dark:text-white">
-      <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8 lg:px-10">
+    <main className="min-h-[100dvh] overflow-x-hidden bg-[#f3f3ed] pb-32 text-[#102017] dark:bg-[#061009] dark:text-white">
+      <div className="mx-auto w-full max-w-[1180px] px-4 pb-8 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8 lg:px-10">
         <header className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="touch-manipulation flex h-11 w-11 items-center justify-center rounded-full border border-black/[0.06] bg-white/80 text-[#183624] shadow-sm backdrop-blur-xl transition active:scale-95 dark:border-white/[0.08] dark:bg-white/[0.055] dark:text-white"
+            className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-black/[0.06] bg-white/80 text-[#183624] shadow-sm backdrop-blur-xl transition active:scale-95 dark:border-white/[0.08] dark:bg-white/[0.055] dark:text-white"
             aria-label="Back to home"
           >
             <ArrowLeft size={19} />
@@ -239,9 +230,7 @@ export default function JourneyPage() {
             </div>
             <div className="min-w-0">
               <p className="text-lg font-black tracking-[-0.045em]">My Journey</p>
-              <p className="truncate text-[11px] text-black/40 dark:text-white/35">
-                Your fresher registration companion.
-              </p>
+              <p className="truncate text-[11px] text-black/40 dark:text-white/35">Fresher registration</p>
             </div>
           </div>
 
@@ -257,14 +246,13 @@ export default function JourneyPage() {
 
             <div className="relative z-10 max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-bold text-white/80">
-                <Sparkles size={14} />
-                Fresher guide
+                <Sparkles size={14} /> Fresher guide
               </div>
               <h1 className="mt-5 text-[38px] font-black leading-[0.95] tracking-[-0.055em] sm:text-[50px]">
                 Know what comes next.
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-6 text-white/65 sm:text-base sm:leading-7">
-                Follow the official FUTA process, then use FUTAGO to keep your own checklist organised. Your FUTAGO progress is a personal guide, not your university registration status.
+                Keep your registration steps in one place and know what to do next.
               </p>
             </div>
 
@@ -284,13 +272,13 @@ export default function JourneyPage() {
 
           <aside className="rounded-[32px] border border-black/[0.055] bg-white/75 p-6 shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.045]">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#fff4c9] text-[#745a0c] dark:bg-[#e5cd74]/10 dark:text-[#e5cd74]">
-                <BadgeCheck size={19} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#e8f4ea] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+                <CheckCircle2 size={19} />
               </div>
               <div>
-                <p className="font-black tracking-[-0.025em]">Important distinction</p>
+                <p className="font-black tracking-[-0.025em]">Before you continue</p>
                 <p className="mt-2 text-sm leading-6 text-black/55 dark:text-white/50">
-                  Marking a FUTAGO step complete does not change anything on FUTA's systems. Complete every official action on the university portal or at the required office first.
+                  Mark a step complete after you&apos;ve finished it on the official FUTA portal or at the required office.
                 </p>
               </div>
             </div>
@@ -301,7 +289,7 @@ export default function JourneyPage() {
               rel="noreferrer"
               className="mt-6 flex min-h-12 touch-manipulation items-center justify-between rounded-[18px] bg-[#102f20] px-4 text-sm font-black text-white transition active:scale-[0.98] dark:bg-[#8ce6ad] dark:text-[#082013]"
             >
-              Official FUTA portal
+              FUTA student portal
               <ArrowUpRight size={17} />
             </a>
           </aside>
@@ -310,21 +298,17 @@ export default function JourneyPage() {
         <section className="mt-8">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#397950] dark:text-[#8ce6ad]">
-                Registration checklist
-              </p>
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.045em] sm:text-3xl">
-                Your path through registration
-              </h2>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#397950] dark:text-[#8ce6ad]">Registration checklist</p>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.045em] sm:text-3xl">Your path through registration</h2>
             </div>
             <p className="hidden text-right text-xs leading-5 text-black/40 sm:block dark:text-white/35">
-              Tap a status to move it forward.
-              <br />Tap the card for details.
+              Tap the status to update it.
+              <br />Tap a step for details.
             </p>
           </div>
 
           <div className="space-y-3">
-            {steps.map((step, index) => {
+            {steps.map((step) => {
               const status = statuses[step.id] ?? "not_started";
               const isOpen = openStep === step.id;
               const Icon = step.icon;
@@ -338,16 +322,16 @@ export default function JourneyPage() {
                     <button
                       type="button"
                       onClick={() => cycleStatus(step.id)}
-                      className={`mt-0.5 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-[15px] border transition active:scale-95 ${statusClasses(status)}`}
-                      aria-label={`Change ${step.title} status. Current status: ${STATUS_LABELS[status]}`}
+                      className={`mt-0.5 flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-[15px] border transition active:scale-95 ${
+                        status === "completed"
+                          ? "border-[#2f8554]/20 bg-[#dff5e7] text-[#1d6a3d] dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#9af0b9]"
+                          : status === "in_progress"
+                            ? "border-[#d3a53b]/20 bg-[#fff3cf] text-[#8a6815] dark:border-[#e0c563]/20 dark:bg-[#e0c563]/10 dark:text-[#e0c563]"
+                            : "border-black/[0.06] bg-[#f5f5ef] text-black/30 dark:border-white/[0.07] dark:bg-white/[0.04] dark:text-white/30"
+                      }`}
+                      aria-label={`Change status for ${step.title}`}
                     >
-                      {status === "completed" ? (
-                        <Check size={19} strokeWidth={3} />
-                      ) : status === "in_progress" ? (
-                        <Clock3 size={18} />
-                      ) : (
-                        <Circle size={17} />
-                      )}
+                      {status === "completed" ? <Check size={18} /> : status === "in_progress" ? <Circle size={17} /> : <Circle size={17} />}
                     </button>
 
                     <button
@@ -355,91 +339,62 @@ export default function JourneyPage() {
                       onClick={() => setOpenStep(isOpen ? "" : step.id)}
                       className="min-w-0 flex-1 touch-manipulation text-left"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#3d7e53] dark:text-[#8ce6ad]">
-                              {step.eyebrow}
-                            </span>
-                            <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold ${statusBadgeClasses(status)}`}>
-                              {STATUS_LABELS[status]}
-                            </span>
-                          </div>
-                          <h3 className="mt-2 text-[17px] font-black leading-6 tracking-[-0.025em] sm:text-lg">
-                            {step.title}
-                          </h3>
-                          <p className="mt-1.5 text-sm leading-6 text-black/50 dark:text-white/45">
-                            {step.summary}
-                          </p>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                          <div className="hidden h-10 w-10 items-center justify-center rounded-[14px] bg-[#edf5ee] text-[#245e3a] sm:flex dark:bg-white/[0.055] dark:text-[#8ce6ad]">
-                            <Icon size={18} />
-                          </div>
-                          <ChevronDown
-                            size={18}
-                            className={`mt-2 text-black/35 transition-transform dark:text-white/35 ${isOpen ? "rotate-180" : ""}`}
-                          />
-                        </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[0.13em] text-[#397950] dark:text-[#8ce6ad]">{step.eyebrow}</span>
+                        <span className="rounded-full bg-black/[0.035] px-2 py-1 text-[9px] font-bold text-black/38 dark:bg-white/[0.05] dark:text-white/35">{STATUS_LABELS[status]}</span>
                       </div>
+                      <h3 className="mt-2 text-base font-black tracking-[-0.025em] sm:text-lg">{step.title}</h3>
+                      <p className="mt-1.5 text-sm leading-6 text-black/45 dark:text-white/40">{step.summary}</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setOpenStep(isOpen ? "" : step.id)}
+                      className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-black/35 transition dark:text-white/35 ${isOpen ? "rotate-180" : ""}`}
+                      aria-label={isOpen ? "Close details" : "Open details"}
+                    >
+                      <ChevronDown size={18} />
                     </button>
                   </div>
 
                   {isOpen && (
-                    <div className="border-t border-black/[0.055] px-4 pb-5 pt-4 sm:px-5 dark:border-white/[0.075]">
+                    <div className="border-t border-black/[0.05] px-4 pb-5 pt-4 dark:border-white/[0.06] sm:px-5">
                       <div className="grid gap-5 lg:grid-cols-[1fr_.72fr]">
                         <div>
-                          <p className="text-xs font-black uppercase tracking-[0.14em] text-black/35 dark:text-white/35">
-                            What to do
-                          </p>
-                          <div className="mt-3 space-y-3">
+                          <p className="text-xs font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/30">What to do</p>
+                          <ul className="mt-3 space-y-3">
                             {step.details.map((detail) => (
-                              <div key={detail} className="flex gap-3 text-sm leading-6 text-black/60 dark:text-white/52">
-                                <CheckCircle2 className="mt-1 shrink-0 text-[#41855a] dark:text-[#8ce6ad]" size={16} />
-                                <p>{detail}</p>
-                              </div>
+                              <li key={detail} className="flex gap-3 text-sm leading-6 text-black/55 dark:text-white/50">
+                                <CheckCircle2 size={16} className="mt-1 shrink-0 text-[#397950] dark:text-[#8ce6ad]" />
+                                <span>{detail}</span>
+                              </li>
                             ))}
-                          </div>
+                          </ul>
 
                           {step.requirements && (
-                            <div className="mt-5 rounded-[20px] bg-[#f4f0dc] p-4 dark:bg-[#e5cd74]/[0.07]">
-                              <p className="text-xs font-black uppercase tracking-[0.13em] text-[#775f18] dark:text-[#e5cd74]">
-                                Documents to prepare
-                              </p>
+                            <div className="mt-5 rounded-[20px] bg-[#f0eee4] p-4 dark:bg-white/[0.035]">
+                              <p className="text-xs font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/30">Documents to prepare</p>
                               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                                 {step.requirements.map((item) => (
-                                  <div key={item} className="flex items-start gap-2 text-xs leading-5 text-[#5f5124] dark:text-white/55">
-                                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#9a7d26] dark:bg-[#e5cd74]" />
+                                  <div key={item} className="flex items-start gap-2 text-xs font-semibold leading-5 text-black/55 dark:text-white/48">
+                                    <FileCheck2 size={14} className="mt-0.5 shrink-0 text-[#397950] dark:text-[#8ce6ad]" />
                                     {item}
                                   </div>
                                 ))}
                               </div>
                             </div>
                           )}
-
-                          {step.note && (
-                            <p className="mt-4 rounded-[18px] border border-[#a87c21]/15 bg-[#fff8df] p-3.5 text-xs leading-5 text-[#6a5319] dark:border-[#e5cd74]/10 dark:bg-[#e5cd74]/[0.055] dark:text-[#dbc979]">
-                              {step.note}
-                            </p>
-                          )}
                         </div>
 
                         <div className="space-y-3">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+                            <Icon size={19} />
+                          </div>
+
                           {step.location && (
-                            <div className="rounded-[20px] border border-black/[0.05] bg-[#f6f7f1] p-4 dark:border-white/[0.07] dark:bg-black/10">
-                              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/35">
-                                <MapPin size={14} /> Location
-                              </div>
-                              <p className="mt-2 text-sm font-bold">{step.location}</p>
-                              <button
-                                type="button"
-                                onClick={() => router.push("/explore")}
-                                className="mt-3 flex min-h-11 w-full touch-manipulation items-center justify-between rounded-[15px] bg-[#e2f3e6] px-3.5 text-xs font-black text-[#24613a] active:scale-[0.98] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]"
-                              >
-                                Open FUTAGO Explore
-                                <Navigation size={15} />
-                              </button>
+                            <div className="rounded-[18px] border border-black/[0.05] p-4 dark:border-white/[0.06]">
+                              <p className="text-[10px] font-black uppercase tracking-[0.11em] text-black/30 dark:text-white/28">Where</p>
+                              <p className="mt-1.5 text-sm font-bold">{step.location}</p>
                             </div>
                           )}
 
@@ -448,34 +403,16 @@ export default function JourneyPage() {
                               href={step.officialUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="flex min-h-12 touch-manipulation items-center justify-between rounded-[18px] border border-black/[0.055] bg-white px-4 text-sm font-black text-[#214d32] transition active:scale-[0.98] dark:border-white/[0.08] dark:bg-white/[0.055] dark:text-[#9af0b9]"
+                              className="flex min-h-12 items-center justify-between rounded-[17px] bg-[#153f2a] px-4 text-sm font-extrabold text-white dark:bg-[#8ce6ad] dark:text-[#092417]"
                             >
-                              <span className="pr-3">{step.officialLabel ?? "Open official FUTA page"}</span>
-                              <ExternalLink size={16} className="shrink-0" />
+                              {step.officialLabel ?? "Open official link"}
+                              <ArrowUpRight size={16} />
                             </a>
                           )}
 
-                          <div className="rounded-[20px] border border-black/[0.055] p-4 dark:border-white/[0.07]">
-                            <p className="text-xs font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/35">
-                              Mark your progress
-                            </p>
-                            <div className="mt-3 grid grid-cols-3 gap-2">
-                              {(["not_started", "in_progress", "completed"] as StepStatus[]).map((option) => (
-                                <button
-                                  key={option}
-                                  type="button"
-                                  onClick={() => setStatus(step.id, option)}
-                                  className={`min-h-11 touch-manipulation rounded-[14px] px-2 text-[10px] font-extrabold leading-tight transition active:scale-95 ${
-                                    status === option
-                                      ? "bg-[#153f2a] text-white dark:bg-[#8ce6ad] dark:text-[#082013]"
-                                      : "bg-black/[0.035] text-black/50 dark:bg-white/[0.05] dark:text-white/45"
-                                  }`}
-                                >
-                                  {STATUS_LABELS[option]}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                          {step.note && (
+                            <p className="rounded-[18px] bg-[#fff4cc] p-4 text-xs leading-5 text-[#6f5715] dark:bg-[#e0c563]/10 dark:text-[#e0c563]">{step.note}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -486,64 +423,10 @@ export default function JourneyPage() {
           </div>
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-2">
-          <div className="rounded-[28px] bg-[#e3efe4] p-5 dark:bg-[#8ce6ad]/[0.07]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 text-[#2e7147] dark:bg-white/[0.06] dark:text-[#8ce6ad]">
-              <ShieldCheck size={19} />
-            </div>
-            <h2 className="mt-4 text-lg font-black tracking-[-0.03em]">Use official information first</h2>
-            <p className="mt-2 text-sm leading-6 text-black/55 dark:text-white/48">
-              FUTAGO simplifies the journey, but FUTA can update requirements, deadlines and portal procedures. When there is any difference, the current official FUTA instruction is the authority.
-            </p>
-          </div>
-
-          <div className="rounded-[28px] bg-[#173f2a] p-5 text-white dark:bg-[#10291b]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/10 text-[#9af0b9]">
-              <Navigation size={19} />
-            </div>
-            <h2 className="mt-4 text-lg font-black tracking-[-0.03em]">Need to find an office?</h2>
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Open Explore to search FUTA places and get campus navigation support.
-            </p>
-            <button
-              type="button"
-              onClick={() => router.push("/explore")}
-              className="mt-4 flex min-h-11 w-full touch-manipulation items-center justify-between rounded-[16px] bg-[#9af0b9] px-4 text-sm font-black text-[#092214] active:scale-[0.98]"
-            >
-              Go to Explore
-              <Navigation size={16} />
-            </button>
-          </div>
-        </section>
-
-        <p className="mx-auto mt-7 max-w-3xl text-center text-[11px] leading-5 text-black/35 dark:text-white/30">
-          FUTAGO is an independent student companion and is not an official FUTA portal. Checklist progress is stored on this device for now and does not represent official university registration status.
+        <p className="mx-auto mt-7 max-w-[720px] text-center text-[11px] leading-5 text-black/32 dark:text-white/28">
+          Your checklist helps you keep track of your steps. Your official registration status is shown by FUTA.
         </p>
       </div>
     </main>
   );
-}
-
-function statusClasses(status: StepStatus) {
-  if (status === "completed") {
-    return "border-[#318250]/15 bg-[#dff5e5] text-[#23703f] dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad] dark:text-[#082013]";
-  }
-
-  if (status === "in_progress") {
-    return "border-[#b0882a]/15 bg-[#fff2c8] text-[#806315] dark:border-[#e5cd74]/15 dark:bg-[#e5cd74]/10 dark:text-[#e5cd74]";
-  }
-
-  return "border-black/[0.055] bg-black/[0.025] text-black/35 dark:border-white/[0.07] dark:bg-white/[0.04] dark:text-white/35";
-}
-
-function statusBadgeClasses(status: StepStatus) {
-  if (status === "completed") {
-    return "bg-[#e0f3e5] text-[#286d40] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]";
-  }
-
-  if (status === "in_progress") {
-    return "bg-[#fff1c4] text-[#806315] dark:bg-[#e5cd74]/10 dark:text-[#e5cd74]";
-  }
-
-  return "bg-black/[0.045] text-black/40 dark:bg-white/[0.05] dark:text-white/40";
 }
