@@ -1,5 +1,5 @@
 -- FUTAGO current FUTA academic structure seed
--- Sources checked against current FUTA school pages in September 2026.
+-- Checked against current official FUTA school pages in September 2026.
 -- Safe to run more than once.
 
 begin;
@@ -22,6 +22,15 @@ on conflict (short_name) do update
 set name = excluded.name,
     slug = excluded.slug;
 
+-- Remove superseded entries previously seeded by FUTAGO.
+delete from public.departments
+where school_id = (select id from public.schools where short_name = 'SLIT')
+  and name in ('Transport Management Technology', 'Library Management Technology');
+
+delete from public.departments
+where school_id = (select id from public.schools where short_name = 'SEMS')
+  and name in ('Meteorology', 'Remote Sensing and Geoscience Information Systems');
+
 -- SAAT
 insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
@@ -31,10 +40,11 @@ cross join (values
   ('Agricultural and Resource Economics', 'ARE', 'agricultural-resource-economics'),
   ('Animal Production and Health', 'APH', 'animal-production-health'),
   ('Crop, Soil and Pest Management', 'CSP', 'crop-soil-pest-management'),
-  ('Fisheries and Aquaculture Technology', 'FAT', 'fisheries-aquaculture-technology'),
   ('Ecotourism and Wildlife Management', 'EWM', 'ecotourism-wildlife-management'),
+  ('Fisheries and Aquaculture Technology', 'FAT', 'fisheries-aquaculture-technology'),
+  ('Food Science and Technology', 'FST', 'food-science-technology'),
   ('Forestry and Wood Technology', 'FWT', 'forestry-wood-technology'),
-  ('Food Science and Technology', 'FST', 'food-science-technology')
+  ('Nutrition and Dietetics', 'NUD', 'nutrition-dietetics')
 ) as d(name, short_name, slug)
 where s.short_name = 'SAAT'
 on conflict (school_id, name) do update
@@ -46,11 +56,11 @@ insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
 from public.schools s
 cross join (values
-  ('Applied Geophysics', 'AGP', 'applied-geophysics'),
   ('Applied Geology', 'AGY', 'applied-geology'),
-  ('Meteorology', 'MET', 'meteorology'),
+  ('Applied Geophysics', 'AGP', 'applied-geophysics'),
   ('Marine Science and Technology', 'MST', 'marine-science-technology'),
-  ('Remote Sensing and Geoscience Information Systems', 'RSG', 'remote-sensing-geoscience-information-systems')
+  ('Meteorology and Climate Science', 'MCS', 'meteorology-climate-science'),
+  ('Remote Sensing and GIS', 'RSG', 'remote-sensing-gis')
 ) as d(name, short_name, slug)
 where s.short_name = 'SEMS'
 on conflict (school_id, name) do update
@@ -63,12 +73,12 @@ select id, d.name, d.short_name, d.slug
 from public.schools s
 cross join (values
   ('Architecture', 'ARC', 'architecture'),
-  ('Building Technology', 'BDG', 'building-technology'),
+  ('Building', 'BDT', 'building'),
   ('Estate Management', 'ESM', 'estate-management'),
   ('Industrial Design', 'IDD', 'industrial-design'),
   ('Quantity Surveying', 'QSV', 'quantity-surveying'),
-  ('Urban and Regional Planning', 'URP', 'urban-regional-planning'),
-  ('Surveying and Geoinformatics', 'SVG', 'surveying-geoinformatics')
+  ('Surveying and Geoinformatics', 'SVG', 'surveying-geoinformatics'),
+  ('Urban and Regional Planning', 'URP', 'urban-regional-planning')
 ) as d(name, short_name, slug)
 where s.short_name = 'SET'
 on conflict (school_id, name) do update
@@ -80,10 +90,11 @@ insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
 from public.schools s
 cross join (values
+  ('Business Information Technology', 'BIT', 'business-information-technology'),
+  ('Entrepreneurship Management Technology', 'EMT', 'entrepreneurship-management-technology'),
   ('Project Management Technology', 'PMT', 'project-management-technology'),
-  ('Transport Management Technology', 'TMT', 'transport-management-technology'),
-  ('Library Management Technology', 'LMT', 'library-management-technology'),
-  ('Entrepreneurship Management Technology', 'EMT', 'entrepreneurship-management-technology')
+  ('Logistics and Transport Technology', 'LTT', 'logistics-transport-technology'),
+  ('Securities and Investment Management Technology', 'SIMT', 'securities-investment-management-technology')
 ) as d(name, short_name, slug)
 where s.short_name = 'SLIT'
 on conflict (school_id, name) do update
@@ -97,21 +108,23 @@ from public.schools s
 cross join (values
   ('Biochemistry', 'BCH', 'biochemistry'),
   ('Biology', 'BIO', 'biology'),
+  ('Biotechnology', 'BTH', 'biotechnology'),
   ('Microbiology', 'MCB', 'microbiology'),
-  ('Biotechnology', 'BTH', 'biotechnology')
+  ('Plant Biology', 'PLB', 'plant-biology'),
+  ('Animal and Environmental Biology', 'AEB', 'animal-environmental-biology')
 ) as d(name, short_name, slug)
 where s.short_name = 'SLS'
 on conflict (school_id, name) do update
 set short_name = excluded.short_name,
     slug = excluded.slug;
 
--- SPS
+-- SPS undergraduate degree departments.
 insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
 from public.schools s
 cross join (values
   ('Chemistry', 'CHE', 'chemistry'),
-  ('Mathematical Sciences', 'MTS', 'mathematical-sciences'),
+  ('Mathematics', 'MTS', 'mathematics'),
   ('Physics', 'PHY', 'physics'),
   ('Statistics', 'STA', 'statistics')
 ) as d(name, short_name, slug)
@@ -129,15 +142,15 @@ cross join (values
   ('Information Technology', 'IFT', 'information-technology'),
   ('Cybersecurity', 'CYS', 'cybersecurity'),
   ('Information Systems', 'IFS', 'information-systems'),
-  ('Software Engineering', 'SEN', 'software-engineering'),
-  ('Data Science', 'DSC', 'data-science')
+  ('Data Science', 'DSC', 'data-science'),
+  ('Software Engineering', 'SEN', 'software-engineering')
 ) as d(name, short_name, slug)
 where s.short_name = 'SOC'
 on conflict (school_id, name) do update
 set short_name = excluded.short_name,
     slug = excluded.slug;
 
--- SIMME (created from the former SEET structure)
+-- SIMME
 insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
 from public.schools s
@@ -160,10 +173,10 @@ insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
 from public.schools s
 cross join (values
-  ('Electrical and Electronics Engineering', 'EEE', 'electrical-electronics-engineering'),
-  ('Computer Engineering', 'CPE', 'computer-engineering'),
-  ('Information and Communication Technology Engineering', 'ICT', 'information-communication-technology-engineering'),
   ('Biomedical Engineering', 'BME', 'biomedical-engineering'),
+  ('Computer Engineering', 'CPE', 'computer-engineering'),
+  ('Electrical and Electronics Engineering', 'EEE', 'electrical-electronics-engineering'),
+  ('Information and Communication Engineering', 'ICT', 'information-communication-engineering'),
   ('Mechatronics Engineering', 'MTE', 'mechatronics-engineering')
 ) as d(name, short_name, slug)
 where s.short_name = 'SESE'
@@ -171,7 +184,7 @@ on conflict (school_id, name) do update
 set short_name = excluded.short_name,
     slug = excluded.slug;
 
--- SBMS undergraduate programmes/departments listed by FUTA
+-- SBMS
 insert into public.departments (school_id, name, short_name, slug)
 select id, d.name, d.short_name, d.slug
 from public.schools s
@@ -187,5 +200,9 @@ where s.short_name = 'SBMS'
 on conflict (school_id, name) do update
 set short_name = excluded.short_name,
     slug = excluded.slug;
+
+-- SBCS and SCS remain valid FUTA schools inside the College of Health Sciences,
+-- but FUTA's current public school pages do not publish a department list for them.
+-- FUTAGO therefore does not invent department choices for those schools.
 
 commit;
