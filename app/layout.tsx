@@ -4,6 +4,7 @@ import AppAccessGate from "@/components/AppAccessGate";
 import AppBottomNavigation from "@/components/AppBottomNavigation";
 import "./globals.css";
 import "./futago-motion.css";
+import "./futago-campus.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
