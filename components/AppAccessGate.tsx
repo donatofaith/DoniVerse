@@ -8,7 +8,11 @@ import { supabase } from "@/lib/supabase/client";
 
 export const FUTAGO_GUEST_KEY = "futago-guest-mode";
 
+const FUTA_CAMPUS_IMAGE =
+  "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
+
 const openRoutes = new Set(["/auth", "/onboarding", "/reset-password"]);
+const immersiveRoutes = new Set(["/auth", "/reset-password"]);
 
 export default function AppAccessGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -84,5 +88,20 @@ export default function AppAccessGate({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  if (immersiveRoutes.has(pathname)) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      <div className="futago-campus-background" aria-hidden="true">
+        <div
+          className="futago-campus-background__image"
+          style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
+        />
+        <div className="futago-campus-background__veil" />
+      </div>
+      <div className="futago-app-surface">{children}</div>
+    </>
+  );
 }
