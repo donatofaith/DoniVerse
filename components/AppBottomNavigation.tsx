@@ -33,11 +33,9 @@ export default function AppBottomNavigation() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[max(10px,env(safe-area-inset-bottom))] z-[100] px-3 sm:bottom-5">
+    <div className="fixed bottom-[max(12px,env(safe-area-inset-bottom))] left-0 right-0 z-[100] px-3 sm:bottom-5">
       <div className="mx-auto max-w-[620px]">
-        <nav className="pointer-events-auto relative flex min-h-[74px] items-center justify-around overflow-hidden rounded-[28px] border border-white/45 bg-white/55 px-2 shadow-[0_22px_70px_rgba(13,37,24,0.2)] backdrop-blur-[28px] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,rgba(255,255,255,0.42),rgba(255,255,255,0.08)_45%,rgba(122,222,157,0.05))] dark:border-white/[0.1] dark:bg-[#0a1510]/70 dark:shadow-[0_24px_70px_rgba(0,0,0,0.42)] dark:before:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.015)_48%,rgba(140,230,173,0.04))]">
-          <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent dark:via-white/25" />
-
+        <nav className="relative flex h-[72px] items-center justify-around overflow-hidden rounded-[25px] border border-white/70 bg-white/48 px-2 shadow-[0_20px_60px_rgba(16,42,27,0.18)] backdrop-blur-3xl dark:border-white/12 dark:bg-[#0b1410]/72 dark:shadow-[0_20px_60px_rgba(0,0,0,0.32)]">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href;
@@ -47,28 +45,28 @@ export default function AppBottomNavigation() {
                 key={item.label}
                 type="button"
                 onClick={() => router.push(item.href)}
-                className="relative z-10 flex min-h-[58px] min-w-0 flex-1 touch-manipulation flex-col items-center justify-center gap-1 rounded-[20px] transition active:scale-[0.96]"
+                className="relative z-10 flex min-w-0 flex-1 touch-manipulation flex-col items-center justify-center gap-1"
                 aria-current={active ? "page" : undefined}
               >
                 {active && (
-                  <div className="absolute inset-x-1.5 inset-y-1 rounded-[18px] border border-white/55 bg-white/65 shadow-[0_8px_24px_rgba(29,78,49,0.08)] backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.08] dark:shadow-none" />
+                  <div className="absolute inset-x-1 -inset-y-2 rounded-[18px] border border-white/65 bg-white/42 backdrop-blur-xl dark:border-white/8 dark:bg-white/[0.06]" />
                 )}
 
                 <div
-                  className={`relative z-10 flex h-7 w-7 items-center justify-center transition-all duration-200 ${
+                  className={`relative z-10 transition-transform duration-200 ${
                     active
-                      ? "-translate-y-0.5 text-[#1f6b41] dark:text-[#9bf0b8]"
-                      : "text-black/38 dark:text-white/40"
+                      ? "-translate-y-0.5 text-[#2f6947] dark:text-[#a9efc1]"
+                      : "text-black/38 dark:text-white/38"
                   }`}
                 >
-                  <Icon size={19} strokeWidth={active ? 2.4 : 2} />
+                  <Icon size={19} />
                 </div>
 
                 <span
-                  className={`relative z-10 max-w-full truncate text-[10px] font-extrabold tracking-[-0.01em] ${
+                  className={`relative z-10 max-w-full truncate text-[10px] font-bold ${
                     active
-                      ? "text-[#1f6b41] dark:text-[#9bf0b8]"
-                      : "text-black/38 dark:text-white/40"
+                      ? "text-[#2f6947] dark:text-[#a9efc1]"
+                      : "text-black/38 dark:text-white/38"
                   }`}
                 >
                   {item.label}
