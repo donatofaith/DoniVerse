@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -26,6 +26,7 @@ const FUTA_CAMPUS_VIDEO = "/futago-auth-campus.mp4";
 
 export default function AuthPage() {
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [mode, setMode] = useState<AuthMode>("signup");
   const [viewMode, setViewMode] = useState<ViewMode>("auth");
   const [fullName, setFullName] = useState("");
@@ -35,6 +36,23 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    const play = () => {
+      void video.play().catch(() => {
+        // Poster remains visible when a browser blocks autoplay.
+      });
+    };
+
+    if (video.readyState >= 2) play();
+    else video.addEventListener("canplay", play, { once: true });
+
+    return () => video.removeEventListener("canplay", play);
+  }, []);
 
   const resetFeedback = () => {
     setMessage("");
@@ -184,19 +202,19 @@ export default function AuthPage() {
           aria-hidden="true"
         />
         <video
+          ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           poster={FUTA_CAMPUS_IMAGE}
           aria-hidden="true"
         >
           <source src={FUTA_CAMPUS_VIDEO} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,15,10,0.28)_0%,rgba(5,15,10,0.52)_40%,rgba(5,15,10,0.92)_100%)]" aria-hidden="true" />
-        <div className="absolute inset-0 backdrop-blur-[1px]" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,15,10,0.22)_0%,rgba(5,15,10,0.46)_40%,rgba(5,15,10,0.90)_100%)]" aria-hidden="true" />
 
         <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[1220px] flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))] sm:px-6 lg:grid lg:grid-cols-[1.05fr_.95fr] lg:gap-12 lg:px-10">
           <section className="flex min-h-[38vh] flex-col justify-between pb-8 lg:min-h-[100dvh] lg:py-10">
