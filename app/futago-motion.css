@@ -2,9 +2,9 @@
    Core content stays visible without this stylesheet or without animation support. */
 
 /* ---------------------------------------------------------
-   Home: turn the animated Explore route dot into a walker.
-   The existing Framer Motion parent still moves along the route;
-   this layer only changes the visual from a dot to a person.
+   Home: animated Explore route + walker.
+   CSS owns the visible motion so production does not depend on
+   Framer Motion hydration for this decorative layer.
 --------------------------------------------------------- */
 [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"] {
   width: 30px !important;
@@ -13,6 +13,8 @@
   background: transparent !important;
   box-shadow: none !important;
   filter: drop-shadow(0 0 10px rgba(181, 246, 203, 0.55));
+  animation: futago-walker-route 5.2s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::before {
@@ -37,6 +39,23 @@
   background: rgba(181, 246, 203, 0.22);
   filter: blur(3px);
   animation: futago-walker-shadow 0.72s ease-in-out infinite alternate;
+}
+
+path[stroke-dasharray="8 15"] {
+  animation: futago-route-dashes 4.8s linear infinite;
+}
+
+@keyframes futago-walker-route {
+  0% { transform: translate(0, 0); opacity: .45; }
+  18% { transform: translate(44px, -18px); opacity: 1; }
+  42% { transform: translate(92px, -72px); opacity: 1; }
+  68% { transform: translate(142px, -95px); opacity: 1; }
+  100% { transform: translate(198px, -145px); opacity: .45; }
+}
+
+@keyframes futago-route-dashes {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -92; }
 }
 
 @keyframes futago-walker-bob {
@@ -85,13 +104,11 @@ main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(7) { animation-delay: 
   }
 }
 
-/* Expanded checklist detail animates into place without hiding core content. */
 main:has(a[href*="firars.futa.edu.ng"]) article > div + div {
   transform-origin: top center;
   animation: futago-journey-detail-in 260ms cubic-bezier(.2,.8,.2,1) both;
 }
 
-/* Progress bar gets a restrained highlight pass. */
 main:has(a[href*="firars.futa.edu.ng"]) [class*="h-2.5"][class*="overflow-hidden"] > div {
   position: relative;
   overflow: hidden;
@@ -106,12 +123,10 @@ main:has(a[href*="firars.futa.edu.ng"]) [class*="h-2.5"][class*="overflow-hidden
   animation: futago-progress-shine 3.8s ease-in-out infinite;
 }
 
-/* In-progress status gets a gentle pulse. */
 main:has(a[href*="firars.futa.edu.ng"]) button[class*="bg-[#fff2c8]"] {
   animation: futago-status-pulse 2.2s ease-in-out infinite;
 }
 
-/* Key Journey action icons breathe slightly. */
 main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#123f29]"] svg,
 main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#153f2a]"] svg {
   animation: futago-icon-breathe 3.4s ease-in-out infinite;
@@ -158,10 +173,11 @@ main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#153f2a]"] svg {
   50% { transform: translateY(-1.5px) rotate(2deg); }
 }
 
-/* Respect the user's reduced-motion preference everywhere. */
 @media (prefers-reduced-motion: reduce) {
+  [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"],
   [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::before,
   [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::after,
+  path[stroke-dasharray="8 15"],
   main:has(a[href*="firars.futa.edu.ng"]) header,
   main:has(a[href*="firars.futa.edu.ng"]) > div > section:first-of-type > div:first-child,
   main:has(a[href*="firars.futa.edu.ng"]) > div > section:first-of-type > aside,
