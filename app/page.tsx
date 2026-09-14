@@ -200,6 +200,12 @@ export default function HomePage() {
     router.refresh();
   };
 
+  const openProfile = () => {
+    if (profile.isGuest) return;
+    setProfileOpen(false);
+    router.push("/onboarding");
+  };
+
   return (
     <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#e8f0ea] text-[#102017] dark:bg-[#08110c] dark:text-white">
       <CampusBackdrop />
@@ -259,10 +265,21 @@ export default function HomePage() {
                   </div>
                 </div>
 
+                {!profile.isGuest && (
+                  <button
+                    type="button"
+                    onClick={openProfile}
+                    className="mt-2 flex min-h-12 w-full items-center justify-between rounded-[16px] px-3 text-left text-sm font-extrabold text-[#244f35] transition hover:bg-white/35 dark:text-[#a9efc1] dark:hover:bg-white/[0.05]"
+                  >
+                    <span>Edit profile</span>
+                    <ChevronRight size={17} />
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => void handleAccountAction()}
-                  className="mt-2 flex min-h-12 w-full items-center justify-between rounded-[16px] px-3 text-left text-sm font-extrabold text-[#244f35] transition hover:bg-white/35 dark:text-[#a9efc1] dark:hover:bg-white/[0.05]"
+                  className="mt-1 flex min-h-12 w-full items-center justify-between rounded-[16px] px-3 text-left text-sm font-extrabold text-[#244f35] transition hover:bg-white/35 dark:text-[#a9efc1] dark:hover:bg-white/[0.05]"
                 >
                   <span>{profile.isGuest ? "Sign in" : "Log out"}</span>
                   {profile.isGuest ? <LogIn size={17} /> : <LogOut size={17} />}
