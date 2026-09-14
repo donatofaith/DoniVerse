@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AppAccessGate from "@/components/AppAccessGate";
 import AppBottomNavigation from "@/components/AppBottomNavigation";
+import AdminAccessChip from "@/components/AdminAccessChip";
 import "./globals.css";
 import "./futago-motion.css";
 import "./futago-campus.css";
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <AppAccessGate>
           {children}
+          <AdminAccessChip />
           <AppBottomNavigation />
         </AppAccessGate>
       </body>
