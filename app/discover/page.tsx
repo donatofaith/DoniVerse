@@ -4,11 +4,13 @@ import {
   ArrowRight,
   BookOpen,
   CalendarDays,
+  CheckCircle2,
   ChevronRight,
   Clock3,
   Coffee,
   Compass,
   Dumbbell,
+  ExternalLink,
   HeartHandshake,
   MapPin,
   Search,
@@ -48,7 +50,8 @@ const discoverItems: DiscoverItem[] = [
     title: "FUTA Library",
     category: "study",
     label: "Study",
-    description: "A core campus study destination for reading, research and focused work.",
+    description:
+      "A core campus study destination for reading, research and focused work.",
     location: "Albert Ilemobade Library",
     icon: BookOpen,
     featured: true,
@@ -58,7 +61,8 @@ const discoverItems: DiscoverItem[] = [
     title: "Student Affairs",
     category: "support",
     label: "Student services",
-    description: "A useful starting point for student welfare, guidance and campus support matters.",
+    description:
+      "A useful starting point for student welfare, guidance and campus support matters.",
     location: "Student Affairs Division",
     icon: HeartHandshake,
   },
@@ -67,7 +71,8 @@ const discoverItems: DiscoverItem[] = [
     title: "Food around campus",
     category: "food",
     label: "Food & hangouts",
-    description: "Discover student-friendly places to eat and relax around FUTA as verified spots are added.",
+    description:
+      "Discover student-friendly places to eat and relax around FUTA as verified spots are added.",
     location: "FUTA campus",
     icon: Coffee,
   },
@@ -76,7 +81,8 @@ const discoverItems: DiscoverItem[] = [
     title: "Student communities",
     category: "community",
     label: "Communities",
-    description: "Find academic, faith, creative and student-led communities as FUTAGO verifies their details.",
+    description:
+      "Find academic, faith, creative and student-led communities as FUTAGO verifies their details.",
     location: "Across campus",
     icon: Users,
   },
@@ -85,7 +91,8 @@ const discoverItems: DiscoverItem[] = [
     title: "Sports & recreation",
     category: "sports",
     label: "Sports",
-    description: "Explore campus recreation spaces and student sporting activities.",
+    description:
+      "Explore campus recreation spaces and student sporting activities.",
     location: "FUTA campus",
     icon: Dumbbell,
   },
@@ -112,6 +119,9 @@ export default function DiscoverPage() {
   const openExplore = (place?: string) => {
     router.push(place ? `/explore?q=${encodeURIComponent(place)}` : "/explore");
   };
+
+  const showEvents = activeCategory === "all" || activeCategory === "events";
+  const showDiscoverItems = activeCategory !== "events";
 
   return (
     <main className="min-h-[100dvh] overflow-x-hidden bg-[#f4f3ed] pb-32 text-[#102017] dark:bg-[#061009] dark:text-white">
@@ -145,10 +155,10 @@ export default function DiscoverPage() {
                   <span className="h-2 w-2 animate-pulse rounded-full bg-[#9bedb7]" /> Campus pulse
                 </div>
                 <h2 className="mt-4 max-w-[540px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">
-                  See what&apos;s coming up around FUTA.
+                  See what&apos;s happening around FUTA.
                 </h2>
                 <p className="mt-3 max-w-[540px] text-sm leading-6 text-white/55">
-                  Upcoming events will appear here once they are verified. FUTAGO will show dates, venues and directions without inventing unconfirmed campus events.
+                  Events appear here only when FUTAGO can verify the organiser, date or official source. No random forwarded dates.
                 </p>
               </div>
               <button
@@ -162,17 +172,68 @@ export default function DiscoverPage() {
           </div>
         </section>
 
-        {activeCategory === "events" && (
-          <section className="mt-5 rounded-[26px] border border-black/[0.055] bg-white/70 p-5 shadow-[0_12px_35px_rgba(28,58,39,0.04)] dark:border-white/[0.07] dark:bg-white/[0.035] sm:p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
-                <CalendarDays size={20} />
-              </div>
+        {showEvents && (
+          <section className="mt-6">
+            <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-base font-black">Upcoming events</h2>
-                <p className="mt-1 max-w-[620px] text-sm leading-6 text-black/45 dark:text-white/40">
-                  No verified upcoming event has been published in this build yet. We&apos;ll connect this area to FUTAGO&apos;s event data so expired events disappear automatically and current events stay useful.
-                </p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.13em] text-[#397151] dark:text-[#8ce6ad]">Events & campus updates</p>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.035em]">What&apos;s happening</h2>
+              </div>
+              <CalendarDays size={20} className="text-[#397151] dark:text-[#8ce6ad]" />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[1.14fr_.86fr]">
+              <article className="relative overflow-hidden rounded-[28px] bg-[#173f2b] p-5 text-white sm:p-6">
+                <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full border border-white/10" />
+                <div className="relative z-10">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-[#9bedb7] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.11em] text-[#0b2b1b]">Upcoming</span>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-white/50">
+                      <CheckCircle2 size={13} /> Official FUTA listing
+                    </span>
+                  </div>
+                  <h3 className="mt-5 max-w-[580px] text-[26px] font-black leading-[1.03] tracking-[-0.04em] sm:text-[31px]">13th SAAT Annual Conference 2026</h3>
+                  <p className="mt-3 max-w-[620px] text-sm leading-6 text-white/58">
+                    FUTA currently lists the 13th School of Agriculture and Agricultural Technology Annual Conference 2026 among its featured official links. The accessible listing does not expose a confirmed event date yet, so FUTAGO will not guess one.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-bold text-white/55">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-3 py-2"><CalendarDays size={14} /> Date awaiting official confirmation</span>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-3 py-2"><MapPin size={14} /> FUTA</span>
+                  </div>
+                  <a
+                    href="https://futa.edu.ng/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-[15px] bg-[#9bedb7] px-4 text-sm font-extrabold text-[#0b2b1b] transition active:scale-[0.98]"
+                  >
+                    Check official FUTA page <ExternalLink size={15} />
+                  </a>
+                </div>
+              </article>
+
+              <div className="grid gap-4">
+                <article className="rounded-[26px] border border-black/[0.055] bg-white/75 p-5 dark:border-white/[0.07] dark:bg-white/[0.035]">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+                      <Clock3 size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.11em] text-black/35 dark:text-white/35">Happening now</p>
+                      <h3 className="mt-2 text-base font-black">No verified live campus event right now</h3>
+                      <p className="mt-2 text-sm leading-6 text-black/45 dark:text-white/40">
+                        When a verified event is live, this card will show its time, venue and directions.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <article className="rounded-[26px] bg-[#eee9dc] p-5 dark:bg-[#e0c563]/[0.07]">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.11em] text-[#7b6424] dark:text-[#e0c563]">Recently held</p>
+                  <h3 className="mt-2 text-base font-black">FUTA 206th Inaugural Lecture</h3>
+                  <p className="mt-2 text-sm leading-6 text-black/45 dark:text-white/40">
+                    Professor Kenneth Kanayo Alaneme delivered FUTA&apos;s 206th Inaugural Lecture on 8 September 2026.
+                  </p>
+                </article>
               </div>
             </div>
           </section>
@@ -209,7 +270,7 @@ export default function DiscoverPage() {
           })}
         </div>
 
-        {activeCategory !== "events" && (
+        {showDiscoverItems && (
           <section className="mt-5">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
@@ -258,7 +319,7 @@ export default function DiscoverPage() {
         <section className="mt-7 grid gap-3 sm:grid-cols-2">
           <div className="rounded-[24px] border border-black/[0.05] bg-[#eee9dc] p-5 dark:border-white/[0.06] dark:bg-[#111b14]">
             <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#7b6424] dark:text-[#e0c563]"><Clock3 size={15} /> Event quality</div>
-            <p className="mt-3 text-sm leading-6 text-black/48 dark:text-white/42">Dates, venues and organisers should be verified before an event is promoted as current on FUTAGO.</p>
+            <p className="mt-3 text-sm leading-6 text-black/48 dark:text-white/42">Dates, venues and organisers are shown only after they are verified from an official FUTA source or a trusted organiser.</p>
           </div>
           <button type="button" onClick={() => openExplore()} className="group flex min-h-[132px] touch-manipulation items-center justify-between gap-5 rounded-[24px] bg-[#173f2b] p-5 text-left text-white">
             <div>
