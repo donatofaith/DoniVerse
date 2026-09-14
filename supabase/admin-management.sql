@@ -14,9 +14,9 @@ set search_path = public
 as $$
   select exists (
     select 1
-    from public.admin_users
-    where user_id = check_user_id
-      and role = 'super_admin'
+    from public.admin_users as au
+    where au.user_id = check_user_id
+      and au.role = 'super_admin'
   );
 $$;
 
@@ -39,77 +39,76 @@ returns table (
   role text,
   created_at timestamptz
 )
-language plpgsql
+language sql
+stable
 security definer
 set search_path = public, auth
 as $$
-begin
-  if not public.is_futago_admin(auth.uid()) then
-    raise exception 'Admin access required';
-  end if;
-
-  return query
   select
-    a.user_id,
-    u.email::text,
-    a.role,
-    a.created_at
-  from public.admin_users as a
-  left join auth.users as u on u.id = a.user_id
+    au.user_id,
+    usr.email::text,
+    au.role,
+    au.created_at
+  from public.admin_users as au
+  left join auth.users as usr on usr.id = au.user_id
+  where public.is_futago_admin(auth.uid())
   order by
-    case when a.role = 'super_admin' then 0 else 1 end,
-    a.created_at asc;
-end;
+    case when au.role = 'super_admin' then 0 else 1 end,
+    au.created_at asc;
 $$;
 
 revoke all on function public.list_futago_admins() from public;
 grant execute on function public.list_futago_admins() to authenticated;
 
--- Add a registered FUTAGO user as admin using their Supabase Auth email.
-create or replace function public.set_futago_admin_by_email(
+-- Drop the earlier TABLE-returning version first. Returning JSON avoids PL/pgSQL
+-- output-column names (email/role/user_id) colliding with database column names.
+drop function if exists public.set_futago_admin_by_email(text, text);
+
+create function public.set_futago_admin_by_email(
   target_email text,
   target_role text default 'admin'
 )
-returns table (
-  user_id uuid,
-  email text,
-  role text
-)
+returns jsonb
 language plpgsql
 security definer
 set search_path = public, auth
 as $$
 declare
-  target_user_id uuid;
-  normalized_email text;
+  v_user_id uuid;
+  v_email text;
+  v_role text;
 begin
   if not public.is_futago_super_admin(auth.uid()) then
     raise exception 'Super admin access required';
   end if;
 
-  if target_role not in ('admin', 'super_admin') then
+  v_role := lower(trim(target_role));
+  if v_role not in ('admin', 'super_admin') then
     raise exception 'Invalid admin role';
   end if;
 
-  normalized_email := lower(trim(target_email));
+  v_email := lower(trim(target_email));
 
-  select u.id
-  into target_user_id
-  from auth.users as u
-  where lower(u.email) = normalized_email
+  select usr.id
+    into v_user_id
+  from auth.users as usr
+  where lower(usr.email::text) = v_email
   limit 1;
 
-  if target_user_id is null then
+  if v_user_id is null then
     raise exception 'No FUTAGO account was found with that email';
   end if;
 
-  insert into public.admin_users (user_id, role)
-  values (target_user_id, target_role)
+  insert into public.admin_users as au (user_id, role)
+  values (v_user_id, v_role)
   on conflict (user_id)
   do update set role = excluded.role;
 
-  return query
-  select target_user_id, normalized_email, target_role;
+  return jsonb_build_object(
+    'user_id', v_user_id,
+    'email', v_email,
+    'role', v_role
+  );
 end;
 $$;
 
@@ -132,8 +131,8 @@ begin
     raise exception 'You cannot remove your own super admin access';
   end if;
 
-  delete from public.admin_users
-  where user_id = target_user_id;
+  delete from public.admin_users as au
+  where au.user_id = target_user_id;
 end;
 $$;
 
