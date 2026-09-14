@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -22,9 +22,7 @@ type ViewMode = "auth" | "forgot";
 
 const FUTA_CAMPUS_IMAGE =
   "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
-
-const FUTA_MOTION_VIDEO =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Wikimedia_UG_Nigeria_1lib1ref_23_event_at_FUTA_library.webm?width=960";
+const FUTA_CAMPUS_VIDEO = "/futago-auth-campus.mp4";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -180,9 +178,25 @@ export default function AuthPage() {
   return (
     <main className="min-h-[100dvh] overflow-hidden bg-[#08110c] text-white">
       <div className="relative min-h-[100dvh]">
-        <CampusMotionBackground />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,15,10,0.28)_0%,rgba(5,15,10,0.52)_38%,rgba(5,15,10,0.94)_100%)]" aria-hidden="true" />
-        <div className="absolute inset-0 backdrop-blur-[0.7px]" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
+          aria-hidden="true"
+        />
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={FUTA_CAMPUS_IMAGE}
+          aria-hidden="true"
+        >
+          <source src={FUTA_CAMPUS_VIDEO} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,15,10,0.28)_0%,rgba(5,15,10,0.52)_40%,rgba(5,15,10,0.92)_100%)]" aria-hidden="true" />
+        <div className="absolute inset-0 backdrop-blur-[1px]" aria-hidden="true" />
 
         <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[1220px] flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))] sm:px-6 lg:grid lg:grid-cols-[1.05fr_.95fr] lg:gap-12 lg:px-10">
           <section className="flex min-h-[38vh] flex-col justify-between pb-8 lg:min-h-[100dvh] lg:py-10">
@@ -222,7 +236,7 @@ export default function AuthPage() {
           </section>
 
           <section className="flex flex-1 items-end pb-2 lg:items-center lg:py-12">
-            <div className="w-full rounded-[30px] border border-white/15 bg-[#08110c]/50 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur-3xl sm:p-6 lg:p-7">
+            <div className="w-full rounded-[30px] border border-white/15 bg-[#08110c]/55 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur-3xl sm:p-6 lg:p-7">
               <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
                 <button
                   type="button"
@@ -287,60 +301,6 @@ export default function AuthPage() {
         </div>
       </div>
     </main>
-  );
-}
-
-function CampusMotionBackground() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const startAt = 5;
-    const endAt = 17;
-
-    const keepShortLoop = () => {
-      if (video.currentTime >= endAt) {
-        video.currentTime = startAt;
-        void video.play().catch(() => undefined);
-      }
-    };
-
-    const startVideo = () => {
-      if (Number.isFinite(video.duration) && video.duration > startAt) {
-        video.currentTime = startAt;
-      }
-      void video.play().catch(() => undefined);
-    };
-
-    video.addEventListener("loadedmetadata", startVideo);
-    video.addEventListener("timeupdate", keepShortLoop);
-
-    return () => {
-      video.removeEventListener("loadedmetadata", startVideo);
-      video.removeEventListener("timeupdate", keepShortLoop);
-    };
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div
-        className="absolute inset-0 scale-[1.03] bg-cover bg-center"
-        style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
-      />
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        preload="metadata"
-        poster={FUTA_CAMPUS_IMAGE}
-        className="absolute left-1/2 top-1/2 h-full w-full min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover opacity-90"
-      >
-        <source src={FUTA_MOTION_VIDEO} type="video/webm" />
-      </video>
-    </div>
   );
 }
 
