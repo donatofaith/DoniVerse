@@ -1,0 +1,55 @@
+.futago-campus-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #dfe7e0;
+  pointer-events: none;
+}
+
+.futago-campus-background__image {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.025);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.futago-campus-background__veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(240, 246, 241, 0.74);
+  backdrop-filter: blur(2px);
+}
+
+.futago-app-surface {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+}
+
+/*
+ * All signed-in and guest app pages share one campus backdrop.
+ * Individual page gradients/images are hidden so Home, Explore,
+ * Journey, Discover, Help and Profile feel like one product.
+ */
+.futago-app-surface > main {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.futago-app-surface > main > [aria-hidden="true"].fixed,
+.futago-app-surface > main > [aria-hidden="true"][class*="fixed"] {
+  display: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .futago-campus-background {
+    background: #07100b;
+  }
+
+  .futago-campus-background__veil {
+    background: rgba(6, 14, 9, 0.72);
+  }
+}
