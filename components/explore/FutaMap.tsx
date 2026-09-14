@@ -21,11 +21,24 @@ import L, {
 
 import "leaflet/dist/leaflet.css";
 
+export type PlaceCategory =
+  | "academic"
+  | "study"
+  | "health"
+  | "food"
+  | "services"
+  | "support"
+  | "sports"
+  | "hostel"
+  | "religious"
+  | "transport"
+  | "other";
+
 export type MapPlace = {
   id: number;
   name: string;
   slug: string;
-  category: string;
+  category: PlaceCategory;
   short_name: string | null;
   description: string | null;
   latitude: number;
@@ -372,7 +385,7 @@ function createUserIcon() {
 }
 
 function formatCategory(
-  category: string
+  category: PlaceCategory
 ) {
   return category
     .split("_")
