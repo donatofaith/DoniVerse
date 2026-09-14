@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, MapPin, Search, X } from "lucide-react";
+import { Check, Loader2, MapPin, Search, X } from "lucide-react";
 
 import { supabase } from "@/lib/supabase/client";
 
 export type CampusVenue = {
-  id: number;
+  id: number | null;
   name: string;
   short_name: string | null;
   building_name: string | null;
   category: string;
+  latitude: number;
+  longitude: number;
+  source: "futago" | "openstreetmap";
+  subtitle?: string | null;
 };
 
 type VenuePickerProps = {
@@ -21,6 +25,20 @@ type VenuePickerProps = {
   onClearSelection: () => void;
   label?: string;
 };
+
+type RemoteVenue = {
+  id: string;
+  name: string;
+  subtitle: string;
+  latitude: number;
+  longitude: number;
+  category: string;
+  source: "openstreetmap";
+};
+
+function normalize(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
 
 function searchableText(place: CampusVenue) {
   return `${place.name} ${place.short_name ?? ""} ${place.building_name ?? ""} ${place.category}`.toLowerCase();
@@ -36,8 +54,10 @@ export default function VenuePicker({
 }: VenuePickerProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [places, setPlaces] = useState<CampusVenue[]>([]);
+  const [remotePlaces, setRemotePlaces] = useState<CampusVenue[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchingMap, setSearchingMap] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,13 +65,19 @@ export default function VenuePicker({
     async function loadPlaces() {
       const { data } = await supabase
         .from("places")
-        .select("id,name,short_name,building_name,category")
+        .select("id,name,short_name,building_name,category,latitude,longitude")
         .eq("is_active", true)
         .order("is_featured", { ascending: false })
         .order("name", { ascending: true });
 
       if (cancelled) return;
-      setPlaces((data ?? []) as CampusVenue[]);
+
+      setPlaces(
+        ((data ?? []) as Omit<CampusVenue, "source">[]).map((place) => ({
+          ...place,
+          source: "futago" as const,
+        })),
+      );
       setLoading(false);
     }
 
@@ -72,28 +98,93 @@ export default function VenuePicker({
     return () => document.removeEventListener("pointerdown", close);
   }, []);
 
-  const suggestions = useMemo(() => {
+  const localSuggestions = useMemo(() => {
     const query = value.trim().toLowerCase();
+    const compactQuery = normalize(value);
+
     if (!query) return places.slice(0, 6);
 
     return places
-      .filter((place) => searchableText(place).includes(query))
+      .filter((place) => {
+        const normalText = searchableText(place);
+        const compactText = normalize(normalText);
+        return normalText.includes(query) || compactText.includes(compactQuery);
+      })
       .sort((a, b) => {
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
-        const aStarts = aName.startsWith(query) ? 0 : 1;
-        const bStarts = bName.startsWith(query) ? 0 : 1;
-        return aStarts - bStarts || aName.localeCompare(bName);
+        const aName = normalize(a.name);
+        const bName = normalize(b.name);
+        const aStarts = aName.startsWith(compactQuery) ? 0 : 1;
+        const bStarts = bName.startsWith(compactQuery) ? 0 : 1;
+        return aStarts - bStarts || a.name.localeCompare(b.name);
       })
       .slice(0, 7);
   }, [places, value]);
+
+  useEffect(() => {
+    const query = value.trim();
+
+    if (query.length < 2) {
+      setRemotePlaces([]);
+      setSearchingMap(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setSearchingMap(true);
+
+      try {
+        const response = await fetch(`/api/places/search?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setRemotePlaces([]);
+          return;
+        }
+
+        const payload = (await response.json()) as { results?: RemoteVenue[] };
+        const localNames = new Set(localSuggestions.map((place) => normalize(place.name)));
+
+        setRemotePlaces(
+          (payload.results ?? [])
+            .filter((place) => !localNames.has(normalize(place.name)))
+            .map((place) => ({
+              id: null,
+              name: place.name,
+              short_name: null,
+              building_name: null,
+              category: place.category,
+              latitude: place.latitude,
+              longitude: place.longitude,
+              source: "openstreetmap" as const,
+              subtitle: place.subtitle,
+            }))
+            .slice(0, 6),
+        );
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          setRemotePlaces([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) setSearchingMap(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [value, localSuggestions]);
+
+  const suggestions = [...localSuggestions, ...remotePlaces].slice(0, 9);
 
   const selectedPlace = selectedPlaceId
     ? places.find((place) => place.id === selectedPlaceId) ?? null
     : null;
 
   return (
-    <label className="block" ref={rootRef}>
+    <div className="block" ref={rootRef}>
       <span className="text-sm font-bold text-black/60 dark:text-white/60">{label}</span>
 
       <div className="relative mt-2">
@@ -111,7 +202,9 @@ export default function VenuePicker({
             autoComplete="off"
             className="min-w-0 flex-1 bg-transparent text-base font-semibold outline-none placeholder:text-black/28 dark:text-white dark:placeholder:text-white/25"
           />
-          {value && (
+          {searchingMap ? (
+            <Loader2 size={15} className="shrink-0 animate-spin text-black/35 dark:text-white/35" />
+          ) : value ? (
             <button
               type="button"
               onClick={() => {
@@ -124,7 +217,7 @@ export default function VenuePicker({
             >
               <X size={15} />
             </button>
-          )}
+          ) : null}
         </div>
 
         {selectedPlace && (
@@ -134,13 +227,13 @@ export default function VenuePicker({
         )}
 
         {open && (
-          <div className="absolute left-0 right-0 top-[62px] z-[80] max-h-[300px] overflow-y-auto rounded-[20px] border border-white/70 bg-white/95 p-2 shadow-[0_22px_70px_rgba(16,46,28,0.20)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#09130e]/96">
+          <div className="absolute left-0 right-0 top-[62px] z-[80] max-h-[320px] overflow-y-auto rounded-[20px] border border-white/70 bg-white/95 p-2 shadow-[0_22px_70px_rgba(16,46,28,0.20)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#09130e]/96">
             {loading ? (
               <p className="px-3 py-4 text-sm font-semibold text-black/45 dark:text-white/45">Loading campus locations...</p>
             ) : suggestions.length ? (
-              suggestions.map((place) => (
+              suggestions.map((place, index) => (
                 <button
-                  key={place.id}
+                  key={`${place.source}-${place.id ?? place.name}-${index}`}
                   type="button"
                   onClick={() => {
                     onSelect(place);
@@ -152,26 +245,31 @@ export default function VenuePicker({
                     <MapPin size={16} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-black text-[#102017] dark:text-white">{place.name}</p>
-                    <p className="mt-0.5 truncate text-xs text-black/42 dark:text-white/38">
-                      {[place.short_name, place.building_name, place.category]
-                        .filter(Boolean)
-                        .join(" • ")}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-black text-[#102017] dark:text-white">{place.name}</p>
+                      <span className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-black/40 dark:bg-white/[0.07] dark:text-white/40">
+                        {place.source === "futago" ? "FUTAGO" : "Map"}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-black/42 dark:text-white/38">
+                      {place.subtitle || [place.short_name, place.building_name, place.category].filter(Boolean).join(" • ")}
                     </p>
                   </div>
                 </button>
               ))
+            ) : searchingMap ? (
+              <p className="px-3 py-4 text-sm font-semibold text-black/45 dark:text-white/45">Searching the campus map...</p>
             ) : (
               <div className="px-3 py-4">
-                <p className="text-sm font-bold">No mapped location found.</p>
+                <p className="text-sm font-bold">No campus location found.</p>
                 <p className="mt-1 text-xs leading-5 text-black/42 dark:text-white/38">
-                  You can keep the typed venue, but it will not be linked to a FUTAGO map location.
+                  Try a shorter name such as “Francis”, “Library” or “Student Affairs”.
                 </p>
               </div>
             )}
           </div>
         )}
       </div>
-    </label>
+    </div>
   );
 }
