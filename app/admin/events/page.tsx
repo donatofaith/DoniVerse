@@ -1,12 +1,21 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
   Check,
   Edit3,
+  ImagePlus,
   Loader2,
   MapPin,
   Plus,
@@ -93,8 +102,7 @@ function toLocalDateTime(value: string | null) {
   if (!value) return "";
   const date = new Date(value);
   const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60_000);
-  return local.toISOString().slice(0, 16);
+  return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 16);
 }
 
 function slugify(value: string) {
@@ -103,6 +111,17 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function safeFileName(name: string) {
+  const extension = name.split(".").pop()?.toLowerCase() || "jpg";
+  const base = name
+    .replace(/\.[^/.]+$/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return `${base || "poster"}.${extension}`;
 }
 
 export default function AdminEventsPage() {
@@ -114,11 +133,25 @@ export default function AdminEventsPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<EventForm>(emptyForm);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterPreview, setPosterPreview] = useState("");
   const [saving, setSaving] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
+
+  const clearPosterPreview = useCallback(() => {
+    setPosterFile(null);
+    setPosterPreview("");
+    setForm((current) => ({ ...current, imageUrl: "" }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+    };
+  }, [posterPreview]);
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -175,14 +208,18 @@ export default function AdminEventsPage() {
   const pendingCount = events.filter((event) => event.status === "pending").length;
 
   const openCreate = () => {
+    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
     setEditingId(null);
     setForm(emptyForm);
+    setPosterFile(null);
+    setPosterPreview("");
     setEditorOpen(true);
     setError("");
     setMessage("");
   };
 
   const openEdit = (event: EventRow) => {
+    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
     setEditingId(event.id);
     setForm({
       title: event.title,
@@ -198,9 +235,46 @@ export default function AdminEventsPage() {
       inquiryPhone: event.inquiry_phone ?? "",
       status: event.status,
     });
+    setPosterFile(null);
+    setPosterPreview(event.image_url ?? "");
     setEditorOpen(true);
     setError("");
     setMessage("");
+  };
+
+  const choosePoster = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file for the event poster.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Poster must be 5 MB or smaller.");
+      return;
+    }
+
+    if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+    setPosterFile(file);
+    setPosterPreview(URL.createObjectURL(file));
+    setError("");
+  };
+
+  const uploadPoster = async () => {
+    if (!posterFile) return form.imageUrl.trim() || null;
+
+    const path = `${currentUserId}/${Date.now()}-${safeFileName(posterFile.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from("event-posters")
+      .upload(path, posterFile, { cacheControl: "3600", upsert: false });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from("event-posters").getPublicUrl(path);
+    return data.publicUrl;
   };
 
   const saveEvent = async (event: FormEvent<HTMLFormElement>) => {
@@ -218,51 +292,52 @@ export default function AdminEventsPage() {
     setError("");
     setMessage("");
 
-    const payload = {
-      title,
-      description: form.description.trim() || null,
-      event_type: form.eventType,
-      starts_at: new Date(form.startsAt).toISOString(),
-      ends_at: form.endsAt ? new Date(form.endsAt).toISOString() : null,
-      venue_name: form.venueName.trim() || null,
-      organizer_name: organizer,
-      official_url: form.officialUrl.trim() || null,
-      image_url: form.imageUrl.trim() || null,
-      inquiry_name: form.inquiryName.trim() || null,
-      inquiry_phone: form.inquiryPhone.trim() || null,
-      status: form.status,
-      approved_by: form.status === "approved" ? currentUserId : null,
-      approved_at: form.status === "approved" ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
-    };
+    try {
+      const posterUrl = await uploadPoster();
+      const payload = {
+        title,
+        description: form.description.trim() || null,
+        event_type: form.eventType,
+        starts_at: new Date(form.startsAt).toISOString(),
+        ends_at: form.endsAt ? new Date(form.endsAt).toISOString() : null,
+        venue_name: form.venueName.trim() || null,
+        organizer_name: organizer,
+        official_url: form.officialUrl.trim() || null,
+        image_url: posterUrl,
+        inquiry_name: form.inquiryName.trim() || null,
+        inquiry_phone: form.inquiryPhone.trim() || null,
+        status: form.status,
+        approved_by: form.status === "approved" ? currentUserId : null,
+        approved_at: form.status === "approved" ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      };
 
-    let saveError = null;
+      if (editingId) {
+        const { error: saveError } = await supabase.from("events").update(payload).eq("id", editingId);
+        if (saveError) throw saveError;
+      } else {
+        const slugBase = slugify(title) || "event";
+        const { error: saveError } = await supabase.from("events").insert({
+          ...payload,
+          slug: `${slugBase}-${Date.now().toString(36)}`,
+          created_by: currentUserId,
+        });
+        if (saveError) throw saveError;
+      }
 
-    if (editingId) {
-      const result = await supabase.from("events").update(payload).eq("id", editingId);
-      saveError = result.error;
-    } else {
-      const slugBase = slugify(title) || "event";
-      const result = await supabase.from("events").insert({
-        ...payload,
-        slug: `${slugBase}-${Date.now().toString(36)}`,
-        created_by: currentUserId,
-      });
-      saveError = result.error;
-    }
-
-    if (saveError) {
-      setError(saveError.message);
+      setMessage(editingId ? "Event updated." : "Event created.");
+      if (posterPreview.startsWith("blob:")) URL.revokeObjectURL(posterPreview);
+      setEditorOpen(false);
+      setEditingId(null);
+      setForm(emptyForm);
+      setPosterFile(null);
+      setPosterPreview("");
+      await loadEvents();
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "We could not save this event.");
+    } finally {
       setSaving(false);
-      return;
     }
-
-    setMessage(editingId ? "Event updated." : "Event created.");
-    setEditorOpen(false);
-    setEditingId(null);
-    setForm(emptyForm);
-    setSaving(false);
-    await loadEvents();
   };
 
   const changeStatus = async (event: EventRow, status: EventStatus) => {
@@ -281,9 +356,8 @@ export default function AdminEventsPage() {
       })
       .eq("id", event.id);
 
-    if (updateError) {
-      setError(updateError.message);
-    } else {
+    if (updateError) setError(updateError.message);
+    else {
       setMessage(status === "approved" ? "Event approved and published." : "Event rejected.");
       await loadEvents();
     }
@@ -293,8 +367,7 @@ export default function AdminEventsPage() {
 
   const deleteEvent = async (event: EventRow) => {
     if (actingId) return;
-    const confirmed = window.confirm(`Delete “${event.title}”?`);
-    if (!confirmed) return;
+    if (!window.confirm(`Delete “${event.title}”?`)) return;
 
     setActingId(event.id);
     const { error: deleteError } = await supabase.from("events").delete().eq("id", event.id);
@@ -393,14 +466,45 @@ export default function AdminEventsPage() {
               <Field label="Event type"><select value={form.eventType} onChange={(e) => setForm({ ...form, eventType: e.target.value as EventType })}>{eventTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></Field>
               <Field label="Inquiry name"><input value={form.inquiryName} onChange={(e) => setForm({ ...form, inquiryName: e.target.value })} placeholder="Contact person" /></Field>
               <Field label="Inquiry phone"><input value={form.inquiryPhone} onChange={(e) => setForm({ ...form, inquiryPhone: e.target.value })} placeholder="Phone number" inputMode="tel" /></Field>
-              <Field label="Poster image URL"><input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." /></Field>
+
+              <div className="md:col-span-2">
+                <span className="text-sm font-bold text-black/60 dark:text-white/60">Event poster</span>
+                <div className="mt-2 overflow-hidden rounded-[20px] border border-white/65 bg-white/40 p-3 backdrop-blur-xl dark:border-white/10 dark:bg-[#101914]/70">
+                  {posterPreview ? (
+                    <div className="relative overflow-hidden rounded-[16px] border border-white/60 bg-black/5 dark:border-white/10 dark:bg-black/20">
+                      <img src={posterPreview} alt="Event poster preview" className="max-h-[360px] w-full object-contain" />
+                      <button
+                        type="button"
+                        onClick={clearPosterPreview}
+                        className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/55 text-white backdrop-blur-xl"
+                        aria-label="Remove poster"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex min-h-[150px] flex-col items-center justify-center rounded-[16px] border border-dashed border-black/10 bg-white/25 px-5 text-center dark:border-white/10 dark:bg-white/[0.03]">
+                      <ImagePlus size={25} className="text-[#397151] dark:text-[#9bedb7]" />
+                      <p className="mt-3 text-sm font-black">Upload event poster</p>
+                      <p className="mt-1 text-xs text-black/40 dark:text-white/35">JPG, PNG or WebP · maximum 5 MB</p>
+                    </div>
+                  )}
+
+                  <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[15px] border border-white/65 bg-white/55 px-4 text-sm font-black text-[#214f34] transition active:scale-[0.99] dark:border-white/10 dark:bg-white/[0.06] dark:text-[#a9efc1]">
+                    <ImagePlus size={17} />
+                    {posterPreview ? "Change poster" : "Choose poster"}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" onChange={choosePoster} className="hidden" />
+                  </label>
+                </div>
+              </div>
+
               <Field label="Official link"><input value={form.officialUrl} onChange={(e) => setForm({ ...form, officialUrl: e.target.value })} placeholder="https://..." /></Field>
               <Field label="Status"><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as EventStatus })}><option value="draft">Draft</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></Field>
               <div className="md:col-span-2"><Field label="Description"><textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What is this event about?" /></Field></div>
 
               <button type="submit" disabled={saving} className="md:col-span-2 flex min-h-[56px] items-center justify-center gap-2 rounded-[18px] border border-[#77b68d]/35 bg-[#dff3e5]/90 px-5 text-sm font-black text-[#17462d] disabled:opacity-60 dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]">
                 {saving ? <Loader2 size={17} className="animate-spin" /> : <Check size={17} />}
-                {editingId ? "Save changes" : "Create event"}
+                {saving ? "Saving..." : editingId ? "Save changes" : "Create event"}
               </button>
             </form>
           </section>
@@ -414,24 +518,27 @@ export default function AdminEventsPage() {
             </div>
           ) : (
             visibleEvents.map((event) => (
-              <article key={event.id} className="rounded-[24px] border border-white/60 bg-white/42 p-5 shadow-[0_18px_55px_rgba(16,46,28,0.08)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/58">
-                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${statusClass(event.status)}`}>{event.status}</span>
-                      <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-black/35 dark:text-white/35">{event.event_type}</span>
+              <article key={event.id} className="overflow-hidden rounded-[24px] border border-white/60 bg-white/42 shadow-[0_18px_55px_rgba(16,46,28,0.08)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/58">
+                {event.image_url && <img src={event.image_url} alt="" className="h-44 w-full object-cover sm:h-52" />}
+                <div className="p-5">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${statusClass(event.status)}`}>{event.status}</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-black/35 dark:text-white/35">{event.event_type}</span>
+                      </div>
+                      <h2 className="mt-2 text-xl font-black tracking-[-0.035em]">{event.title}</h2>
+                      <p className="mt-2 text-sm text-black/48 dark:text-white/45">{new Date(event.starts_at).toLocaleString()}</p>
+                      {event.venue_name && <p className="mt-1 flex items-center gap-1.5 text-sm text-black/48 dark:text-white/45"><MapPin size={14} /> {event.venue_name}</p>}
+                      <p className="mt-2 text-xs font-semibold text-black/35 dark:text-white/35">Organiser: {event.organizer_name}</p>
                     </div>
-                    <h2 className="mt-2 text-xl font-black tracking-[-0.035em]">{event.title}</h2>
-                    <p className="mt-2 text-sm text-black/48 dark:text-white/45">{new Date(event.starts_at).toLocaleString()}</p>
-                    {event.venue_name && <p className="mt-1 flex items-center gap-1.5 text-sm text-black/48 dark:text-white/45"><MapPin size={14} /> {event.venue_name}</p>}
-                    <p className="mt-2 text-xs font-semibold text-black/35 dark:text-white/35">Organiser: {event.organizer_name}</p>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2 md:justify-end">
-                    <button onClick={() => openEdit(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/45 px-3 text-xs font-black dark:border-white/10 dark:bg-white/[0.05]"><Edit3 size={14} /> Edit</button>
-                    {event.status !== "approved" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "approved")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-emerald-500/20 bg-emerald-400/10 px-3 text-xs font-black text-emerald-800 dark:text-emerald-200"><Check size={14} /> Approve</button>}
-                    {event.status !== "rejected" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "rejected")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-amber-500/20 bg-amber-400/10 px-3 text-xs font-black text-amber-800 dark:text-amber-200"><X size={14} /> Reject</button>}
-                    <button disabled={actingId === event.id} onClick={() => void deleteEvent(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-red-400/15 bg-red-400/[0.07] px-3 text-xs font-black text-red-700 dark:text-red-300"><Trash2 size={14} /> Delete</button>
+                    <div className="flex flex-wrap gap-2 md:justify-end">
+                      <button onClick={() => openEdit(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/45 px-3 text-xs font-black dark:border-white/10 dark:bg-white/[0.05]"><Edit3 size={14} /> Edit</button>
+                      {event.status !== "approved" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "approved")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-emerald-500/20 bg-emerald-400/10 px-3 text-xs font-black text-emerald-800 dark:text-emerald-200"><Check size={14} /> Approve</button>}
+                      {event.status !== "rejected" && <button disabled={actingId === event.id} onClick={() => void changeStatus(event, "rejected")} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-amber-500/20 bg-amber-400/10 px-3 text-xs font-black text-amber-800 dark:text-amber-200"><X size={14} /> Reject</button>}
+                      <button disabled={actingId === event.id} onClick={() => void deleteEvent(event)} className="flex min-h-10 items-center gap-2 rounded-[14px] border border-red-400/15 bg-red-400/[0.07] px-3 text-xs font-black text-red-700 dark:text-red-300"><Trash2 size={14} /> Delete</button>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -443,7 +550,7 @@ export default function AdminEventsPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
       <span className="text-sm font-bold text-black/60 dark:text-white/60">{label}</span>
