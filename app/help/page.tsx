@@ -1,25 +1,28 @@
 "use client";
 
 import {
-  ArrowRight,
   CircleHelp,
   ExternalLink,
   HeartHandshake,
   LifeBuoy,
-  MapPin,
   Phone,
   ShieldAlert,
   Siren,
   UserRoundSearch,
+  UsersRound,
   WifiOff,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 type EmergencyContact = {
   role: string;
   number: string;
   description: string;
   priority?: "emergency" | "support";
+};
+
+type SupportArea = {
+  title: string;
+  description: string;
 };
 
 const emergencyContacts: EmergencyContact[] = [
@@ -61,9 +64,25 @@ const emergencyContacts: EmergencyContact[] = [
   },
 ];
 
-export default function HelpPage() {
-  const router = useRouter();
+const supportAreas: SupportArea[] = [
+  {
+    title: "Registration support",
+    description:
+      "Get help from a FUTAGO campus supporter when you are confused about where to go or what to do next during registration.",
+  },
+  {
+    title: "Accommodation support",
+    description:
+      "Get guidance when you need help finding the right accommodation information or the right person to speak with.",
+  },
+  {
+    title: "Campus guidance",
+    description:
+      "Reach a student supporter when you are lost, new to campus or need someone to point you in the right direction.",
+  },
+];
 
+export default function HelpPage() {
   return (
     <main className="min-h-[100dvh] overflow-x-hidden bg-[#f4f3ed] pb-32 text-[#102017] dark:bg-[#061009] dark:text-white">
       <div className="mx-auto w-full max-w-[1120px] px-4 pb-8 pt-5 sm:px-6 md:px-8 lg:px-10">
@@ -74,7 +93,7 @@ export default function HelpPage() {
             </div>
             <h1 className="mt-2 text-[36px] font-black leading-none tracking-[-0.055em] sm:text-[48px]">
               Need help?
-              <span className="block text-[#34744c] dark:text-[#8ce6ad]">Start here.</span>
+              <span className="block text-[#34744c] dark:text-[#8ce6ad]">Someone can help.</span>
             </h1>
           </div>
           <div className="hidden h-12 w-12 items-center justify-center rounded-[17px] bg-[#153f2a] text-[#9bedb7] shadow-lg sm:flex">
@@ -83,33 +102,49 @@ export default function HelpPage() {
         </header>
 
         <p className="mt-4 max-w-[660px] text-sm leading-6 text-black/48 dark:text-white/42 sm:text-[15px]">
-          Get official support, find urgent campus contacts, or get your bearings when you&apos;re unsure where to go.
+          Find the right campus contact for urgent assistance, student support or official university help.
         </p>
 
         <section className="mt-7 overflow-hidden rounded-[30px] bg-[#123f29] p-5 text-white shadow-[0_24px_70px_rgba(18,63,41,0.16)] sm:p-7">
           <div className="grid gap-6 lg:grid-cols-[1fr_.72fr] lg:items-end">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#a9efc1]">
-                <LifeBuoy size={14} /> Official help
+                <UsersRound size={14} /> Campus support
               </div>
-              <h2 className="mt-4 max-w-[560px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">
-                Need help with a FUTA service?
+              <h2 className="mt-4 max-w-[590px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">
+                Get help from people who know the campus.
               </h2>
-              <p className="mt-3 max-w-[560px] text-sm leading-6 text-white/58">
-                For portal, registration, screening, payment or account issues, use the official FUTA undergraduate helpdesk.
+              <p className="mt-3 max-w-[590px] text-sm leading-6 text-white/58">
+                FUTAGO campus supporters will help students with registration guidance, accommodation questions and finding their way around campus.
               </p>
             </div>
 
-            <a
-              href="https://helpdesk.futa.edu.ng/undergraduate"
-              target="_blank"
-              rel="noreferrer"
-              className="flex min-h-12 touch-manipulation items-center justify-between gap-3 rounded-[17px] bg-[#9bedb7] px-4 text-sm font-extrabold text-[#0b2b1b] transition active:scale-[0.98]"
-            >
-              Open FUTA helpdesk
-              <ExternalLink size={16} />
-            </a>
+            <div className="rounded-[20px] border border-white/10 bg-white/[0.06] p-4">
+              <p className="text-xs font-black uppercase tracking-[0.12em] text-[#9bedb7]">Support network</p>
+              <p className="mt-2 text-sm leading-6 text-white/65">
+                Support contacts will be assigned by school or faculty so students can reach someone familiar with their area.
+              </p>
+            </div>
           </div>
+        </section>
+
+        <section className="mt-6 grid gap-3 md:grid-cols-3">
+          {supportAreas.map((area) => (
+            <article
+              key={area.title}
+              className="rounded-[26px] border border-black/[0.055] bg-white/72 p-5 dark:border-white/[0.07] dark:bg-white/[0.035]"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
+                <UserRoundSearch size={19} />
+              </div>
+              <h3 className="mt-4 text-lg font-black tracking-[-0.03em]">{area.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-black/45 dark:text-white/40">{area.description}</p>
+              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.11em] text-[#397151] dark:text-[#8ce6ad]">
+                Campus supporter contact
+              </p>
+              <p className="mt-1 text-sm font-bold text-black/35 dark:text-white/30">Not assigned yet</p>
+            </article>
+          ))}
         </section>
 
         <section className="mt-6 overflow-hidden rounded-[30px] border border-[#b4472c]/10 bg-[#fff4ed] shadow-[0_18px_50px_rgba(116,52,35,0.06)] dark:border-[#ff9b76]/10 dark:bg-[#29130e]">
@@ -175,29 +210,25 @@ export default function HelpPage() {
         </section>
 
         <section className="mt-6 rounded-[28px] border border-black/[0.055] bg-white/72 p-5 dark:border-white/[0.07] dark:bg-white/[0.035] sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] bg-[#edf5ee] text-[#34744c] dark:bg-[#8ce6ad]/10 dark:text-[#8ce6ad]">
-                <MapPin size={19} />
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#397151] dark:text-[#8ce6ad]">
+                <LifeBuoy size={14} /> Official help
               </div>
-              <div>
-                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#397151] dark:text-[#8ce6ad]">
-                  I&apos;m lost on campus
-                </p>
-                <h2 className="mt-1 text-lg font-black">Find where you need to go.</h2>
-                <p className="mt-2 max-w-[560px] text-sm leading-6 text-black/45 dark:text-white/40">
-                  Open the campus map, search for your destination and get directions from your current location when available.
-                </p>
-              </div>
+              <h2 className="mt-2 text-xl font-black tracking-[-0.035em]">Need official university assistance?</h2>
+              <p className="mt-2 max-w-[650px] text-sm leading-6 text-black/45 dark:text-white/40">
+                For issues that require an official FUTA response, use the university&apos;s undergraduate helpdesk.
+              </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => router.push("/explore")}
-              className="flex min-h-12 shrink-0 touch-manipulation items-center justify-center gap-2 rounded-[16px] bg-[#153f2a] px-5 text-sm font-extrabold text-white transition active:scale-[0.98] dark:bg-[#8ce6ad] dark:text-[#092417]"
+            <a
+              href="https://helpdesk.futa.edu.ng/undergraduate"
+              target="_blank"
+              rel="noreferrer"
+              className="flex min-h-12 touch-manipulation items-center justify-center gap-2 rounded-[16px] bg-[#153f2a] px-5 text-sm font-extrabold text-white transition active:scale-[0.98] dark:bg-[#8ce6ad] dark:text-[#092417]"
             >
-              Open Explore <ArrowRight size={16} />
-            </button>
+              Official FUTA help <ExternalLink size={16} />
+            </a>
           </div>
         </section>
 
