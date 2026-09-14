@@ -13,11 +13,15 @@ import {
   Mail,
   UserRound,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+
 import { FUTAGO_GUEST_KEY } from "@/components/AppAccessGate";
+import { supabase } from "@/lib/supabase/client";
 
 type AuthMode = "signup" | "signin";
 type ViewMode = "auth" | "forgot";
+
+const FUTA_CAMPUS_IMAGE =
+  "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -45,29 +49,10 @@ export default function AuthPage() {
     resetFeedback();
   };
 
-  const continueAsGuest = async () => {
+  const continueAsGuest = () => {
     if (loading) return;
-
-    try {
-      setLoading(true);
-      await supabase.auth.signOut();
-      window.localStorage.setItem(FUTAGO_GUEST_KEY, "1");
-      router.replace("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const routeSignedInUser = async (userId: string) => {
-    window.localStorage.removeItem(FUTAGO_GUEST_KEY);
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed")
-      .eq("id", userId)
-      .maybeSingle();
-
-    router.replace(profile?.onboarding_completed ? "/" : "/onboarding");
+    window.localStorage.setItem(FUTAGO_GUEST_KEY, "1");
+    router.replace("/");
   };
 
   const handleBack = () => {
@@ -77,7 +62,22 @@ export default function AuthPage() {
       setViewMode("auth");
       setMode("signin");
       resetFeedback();
+      return;
     }
+
+    continueAsGuest();
+  };
+
+  const goAfterSignIn = async (userId: string) => {
+    window.localStorage.removeItem(FUTAGO_GUEST_KEY);
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", userId)
+      .maybeSingle();
+
+    router.replace(profile?.onboarding_completed ? "/" : "/onboarding");
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -119,10 +119,8 @@ export default function AuthPage() {
 
         if (signUpError) throw signUpError;
 
-        window.localStorage.removeItem(FUTAGO_GUEST_KEY);
-
-        if (data.session && data.user) {
-          await routeSignedInUser(data.user.id);
+        if (data.session) {
+          await goAfterSignIn(data.session.user.id);
           return;
         }
 
@@ -139,14 +137,11 @@ export default function AuthPage() {
       });
 
       if (signInError) throw signInError;
+      if (!data.user) throw new Error("We could not sign you in. Please try again.");
 
-      await routeSignedInUser(data.user.id);
+      await goAfterSignIn(data.user.id);
     } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "Something went wrong. Please try again.",
-      );
+      setError(caughtError instanceof Error ? caughtError.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -173,128 +168,124 @@ export default function AuthPage() {
       if (resetError) throw resetError;
       setMessage("Reset link sent. Check your email and follow the link to choose a new password.");
     } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "We could not send the reset email.",
-      );
+      setError(caughtError instanceof Error ? caughtError.message : "We could not send the reset email.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-[100dvh] overflow-x-hidden bg-[#f5f5ef] text-[#132118] dark:bg-[#07100b] dark:text-white">
-      <div className="mx-auto min-h-[100dvh] w-full max-w-[1200px] lg:grid lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden min-h-[100dvh] overflow-hidden bg-[#0e3b25] p-10 lg:flex lg:flex-col lg:justify-between xl:p-14">
-          <DesktopDecoration />
+    <main className="min-h-[100dvh] overflow-hidden bg-[#08110c] text-white">
+      <div className="relative min-h-[100dvh]">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,15,10,0.36)_0%,rgba(5,15,10,0.58)_40%,rgba(5,15,10,0.94)_100%)]" aria-hidden="true" />
+        <div className="absolute inset-0 backdrop-blur-[1px]" aria-hidden="true" />
 
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-white text-[#0e3b25]">
-              <GraduationCap size={22} />
-            </div>
-            <div>
-              <p className="text-xl font-black tracking-[-0.04em] text-white">FUTAGO</p>
-              <p className="text-xs text-white/50">Know where to go.</p>
-            </div>
-          </div>
-
-          <div className="relative z-10 max-w-xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#98f5bd]">
-              Your campus companion
-            </p>
-            <h1 className="mt-4 max-w-lg text-5xl font-black leading-[0.98] tracking-[-0.055em] text-white xl:text-6xl">
-              Campus feels easier when you know where to go.
-            </h1>
-            <p className="mt-6 max-w-md text-base leading-7 text-white/60">
-              Find places, follow your student journey and discover what FUTA has around you.
-            </p>
-          </div>
-
-          <div className="relative z-10 flex items-center gap-3 text-sm text-white/45">
-            <span className="h-2 w-2 rounded-full bg-[#98f5bd]" />
-            Built for everyday campus life
-          </div>
-        </section>
-
-        <section className="relative flex min-h-[100dvh] min-w-0 flex-col">
-          <header className="flex min-h-[72px] shrink-0 items-center justify-between px-4 pt-[env(safe-area-inset-top)] sm:px-8 lg:justify-end lg:px-12 xl:px-16">
-            {viewMode === "forgot" ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={loading}
-                aria-label="Go back"
-                className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-full border border-black/[0.06] bg-white text-[#183624] shadow-sm active:scale-95 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.06] dark:text-white lg:hidden"
-              >
-                <ArrowLeft size={19} />
-              </button>
-            ) : (
-              <div className="h-11 w-11 lg:hidden" />
-            )}
-
-            <button
-              type="button"
-              onClick={() => void continueAsGuest()}
-              disabled={loading}
-              className="touch-manipulation rounded-full px-3 py-3 text-sm font-semibold text-[#31543c] active:opacity-60 disabled:opacity-50 dark:text-white/65 sm:px-4"
-            >
-              Continue as guest
-            </button>
-          </header>
-
-          <div className="mx-auto flex w-full max-w-[560px] flex-1 flex-col justify-center px-4 pb-[max(32px,env(safe-area-inset-bottom))] pt-6 sm:px-8 sm:py-12 md:px-10 lg:px-12 xl:px-16">
-            <div className="mb-8 lg:hidden">
+        <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[1220px] flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))] sm:px-6 lg:grid lg:grid-cols-[1.05fr_.95fr] lg:gap-12 lg:px-10">
+          <section className="flex min-h-[38vh] flex-col justify-between pb-8 lg:min-h-[100dvh] lg:py-10">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] bg-[#123f29] text-white shadow-[0_12px_30px_rgba(18,63,41,0.14)] dark:bg-[#99efb8] dark:text-[#092012]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/20 bg-white/12 text-white shadow-lg backdrop-blur-2xl">
                   <GraduationCap size={22} />
                 </div>
                 <div>
-                  <p className="text-xl font-black tracking-[-0.04em]">FUTAGO</p>
-                  <p className="text-xs text-black/45 dark:text-white/45">Know where to go.</p>
+                  <p className="text-xl font-black tracking-[-0.045em]">FUTAGO</p>
+                  <p className="text-[11px] text-white/55">Know where to go.</p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={continueAsGuest}
+                disabled={loading}
+                className="rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold text-white/85 backdrop-blur-2xl transition active:scale-95 disabled:opacity-50 lg:hidden"
+              >
+                Continue as guest
+              </button>
             </div>
 
-            {viewMode === "forgot" ? (
-              <ForgotPasswordView
-                email={email}
-                setEmail={setEmail}
-                loading={loading}
-                error={error}
-                message={message}
-                onSubmit={handlePasswordReset}
-                onBack={handleBack}
-              />
-            ) : (
-              <AuthView
-                mode={mode}
-                fullName={fullName}
-                email={email}
-                password={password}
-                showPassword={showPassword}
-                loading={loading}
-                error={error}
-                message={message}
-                setFullName={setFullName}
-                setEmail={setEmail}
-                setPassword={setPassword}
-                setShowPassword={setShowPassword}
-                onSwitchMode={switchMode}
-                onForgotPassword={() => {
-                  if (loading) return;
-                  resetFeedback();
-                  setViewMode("forgot");
-                }}
-                onSubmit={handleSubmit}
-              />
-            )}
+            <div className="mt-12 max-w-2xl lg:mb-24">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#a0efbb]">Your campus companion</p>
+              <h1 className="mt-4 max-w-[620px] text-[43px] font-black leading-[0.94] tracking-[-0.06em] sm:text-[58px] lg:text-[72px]">
+                Welcome to
+                <span className="block text-[#a0efbb]">FUTAGO.</span>
+              </h1>
+              <p className="mt-5 max-w-md text-sm leading-6 text-white/62 sm:text-[15px]">
+                Find your way around FUTA, follow your student journey and stay connected to campus life.
+              </p>
+            </div>
 
-            <p className="mt-8 text-center text-xs leading-5 text-black/35 dark:text-white/30">
-              FUTAGO is an independent student companion and is not an official FUTA portal.
-            </p>
-          </div>
-        </section>
+            <p className="hidden text-xs text-white/35 lg:block">Federal University of Technology, Akure</p>
+          </section>
+
+          <section className="flex flex-1 items-end pb-2 lg:items-center lg:py-12">
+            <div className="w-full rounded-[30px] border border-white/15 bg-[#08110c]/55 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur-3xl sm:p-6 lg:p-7">
+              <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={loading}
+                  aria-label="Go back"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.07] text-white/75 transition active:scale-95 disabled:opacity-50"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={continueAsGuest}
+                  disabled={loading}
+                  className="hidden rounded-full border border-white/12 bg-white/[0.07] px-4 py-2.5 text-xs font-bold text-white/75 transition active:scale-95 disabled:opacity-50 lg:block"
+                >
+                  Continue as guest
+                </button>
+              </div>
+
+              {viewMode === "forgot" ? (
+                <ForgotPasswordView
+                  email={email}
+                  setEmail={setEmail}
+                  loading={loading}
+                  error={error}
+                  message={message}
+                  onSubmit={handlePasswordReset}
+                  onBack={() => {
+                    if (loading) return;
+                    setViewMode("auth");
+                    setMode("signin");
+                    resetFeedback();
+                  }}
+                />
+              ) : (
+                <AuthView
+                  mode={mode}
+                  fullName={fullName}
+                  email={email}
+                  password={password}
+                  showPassword={showPassword}
+                  loading={loading}
+                  error={error}
+                  message={message}
+                  setFullName={setFullName}
+                  setEmail={setEmail}
+                  setPassword={setPassword}
+                  setShowPassword={setShowPassword}
+                  onSwitchMode={switchMode}
+                  onForgotPassword={() => {
+                    if (loading) return;
+                    resetFeedback();
+                    setViewMode("forgot");
+                  }}
+                  onSubmit={handleSubmit}
+                />
+              )}
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );
@@ -335,51 +326,56 @@ function AuthView({
 }) {
   return (
     <>
-      <p className="text-sm font-bold text-[#2c7a49] dark:text-[#8ce6ad]">
+      <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#a0efbb]">
         {mode === "signup" ? "Create your account" : "Welcome back"}
       </p>
-      <h1 className="mt-2 max-w-[430px] text-[34px] font-black leading-[1.02] tracking-[-0.05em] min-[380px]:text-[38px] sm:text-[42px]">
+      <h2 className="mt-2 text-[30px] font-black tracking-[-0.05em] sm:text-[36px]">
         {mode === "signup" ? "Make FUTAGO yours." : "Sign in to FUTAGO."}
-      </h1>
-      <p className="mt-3 max-w-sm text-sm leading-6 text-black/50 dark:text-white/45">
+      </h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-white/50">
         {mode === "signup"
-          ? "Create an account to save your department, level and student journey."
+          ? "Save your department, level and student journey."
           : "Continue with your saved campus profile and journey."}
       </p>
 
-      <div className="mt-7 grid grid-cols-2 gap-1 rounded-[18px] bg-black/[0.04] p-1 dark:bg-white/[0.06]">
-        {(["signup", "signin"] as AuthMode[]).map((item) => (
-          <button
-            key={item}
-            type="button"
-            disabled={loading}
-            onClick={() => onSwitchMode(item)}
-            className={`min-h-[48px] touch-manipulation rounded-[14px] px-2 text-[13px] font-bold transition active:scale-[0.99] disabled:opacity-50 sm:px-4 sm:text-sm ${
-              mode === item
-                ? "bg-white text-[#173823] shadow-sm dark:bg-[#173b27] dark:text-white"
-                : "text-black/45 dark:text-white/40"
-            }`}
-          >
-            {item === "signup" ? "Create account" : "Sign in"}
-          </button>
-        ))}
+      <div className="mt-6 grid grid-cols-2 gap-1 rounded-[17px] border border-white/[0.07] bg-black/20 p-1">
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => onSwitchMode("signup")}
+          className={`min-h-11 rounded-[13px] px-3 text-sm font-bold transition disabled:opacity-50 ${
+            mode === "signup" ? "bg-white text-[#102017] shadow-sm" : "text-white/50"
+          }`}
+        >
+          Create account
+        </button>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => onSwitchMode("signin")}
+          className={`min-h-11 rounded-[13px] px-3 text-sm font-bold transition disabled:opacity-50 ${
+            mode === "signin" ? "bg-white text-[#102017] shadow-sm" : "text-white/50"
+          }`}
+        >
+          Sign in
+        </button>
       </div>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} className="mt-5 space-y-4">
         {mode === "signup" && (
-          <AuthField label="Full name" icon={<UserRound size={19} />}>
+          <GlassField label="Full name" icon={<UserRound size={18} />}>
             <input
               type="text"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
               placeholder="Your full name"
               autoComplete="name"
-              className="h-full min-w-0 flex-1 bg-transparent text-base font-medium outline-none placeholder:text-black/30 dark:placeholder:text-white/25"
+              className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-white outline-none placeholder:text-white/28"
             />
-          </AuthField>
+          </GlassField>
         )}
 
-        <AuthField label="Email" icon={<Mail size={19} />}>
+        <GlassField label="Email" icon={<Mail size={18} />}>
           <input
             type="email"
             value={email}
@@ -389,29 +385,27 @@ function AuthView({
             inputMode="email"
             autoCapitalize="none"
             spellCheck={false}
-            className="h-full min-w-0 flex-1 bg-transparent text-base font-medium outline-none placeholder:text-black/30 dark:placeholder:text-white/25"
+            className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-white outline-none placeholder:text-white/28"
           />
-        </AuthField>
+        </GlassField>
 
         <div>
           <div className="mb-2 flex items-center justify-between gap-3">
-            <label htmlFor="password" className="text-sm font-semibold text-black/65 dark:text-white/65">
-              Password
-            </label>
+            <label htmlFor="password" className="text-sm font-semibold text-white/65">Password</label>
             {mode === "signin" && (
               <button
                 type="button"
                 disabled={loading}
                 onClick={onForgotPassword}
-                className="touch-manipulation text-xs font-bold text-[#31784b] disabled:opacity-50 dark:text-[#91eab0]"
+                className="text-xs font-bold text-[#a0efbb] disabled:opacity-50"
               >
                 Forgot password?
               </button>
             )}
           </div>
 
-          <div className="flex h-[58px] min-w-0 items-center gap-3 rounded-[18px] border border-black/[0.07] bg-white px-4 shadow-sm focus-within:border-[#4c9967]/40 focus-within:ring-4 focus-within:ring-[#4c9967]/[0.07] dark:border-white/[0.08] dark:bg-white/[0.045]">
-            <LockKeyhole size={19} className="shrink-0 text-black/35 dark:text-white/35" />
+          <div className="flex h-[56px] items-center gap-3 rounded-[17px] border border-white/12 bg-white/[0.07] px-4 backdrop-blur-2xl focus-within:border-[#a0efbb]/35 focus-within:ring-4 focus-within:ring-[#a0efbb]/[0.05]">
+            <LockKeyhole size={18} className="shrink-0 text-white/40" />
             <input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -419,16 +413,16 @@ function AuthView({
               onChange={(event) => setPassword(event.target.value)}
               placeholder="At least 6 characters"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              className="h-full min-w-0 flex-1 bg-transparent text-base font-medium outline-none placeholder:text-black/30 dark:placeholder:text-white/25"
+              className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-white outline-none placeholder:text-white/28"
             />
             <button
               type="button"
               disabled={loading}
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full text-black/35 active:bg-black/[0.05] disabled:opacity-50 dark:text-white/35 dark:active:bg-white/[0.05]"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/40 active:bg-white/[0.06] disabled:opacity-50"
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
             </button>
           </div>
         </div>
@@ -439,18 +433,11 @@ function AuthView({
         <button
           type="submit"
           disabled={loading}
-          className="flex min-h-[60px] w-full touch-manipulation items-center justify-between gap-4 rounded-[19px] bg-[#123f29] px-5 py-3 text-left text-white shadow-[0_16px_40px_rgba(18,63,41,0.18)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#89e4aa] dark:text-[#082013]"
+          className="flex min-h-[58px] w-full items-center justify-between gap-4 rounded-[18px] bg-[#a0efbb] px-5 text-left text-[#082013] shadow-[0_16px_40px_rgba(83,207,126,0.16)] transition active:scale-[0.99] disabled:opacity-60"
         >
-          <div className="min-w-0">
-            <span className="block text-[15px] font-extrabold">
-              {loading ? "Please wait..." : mode === "signup" ? "Create my account" : "Sign in"}
-            </span>
-            {!loading && (
-              <span className="mt-0.5 block text-xs text-white/55 dark:text-[#082013]/55">
-                {mode === "signup" ? "Continue to student setup" : "Continue to FUTAGO"}
-              </span>
-            )}
-          </div>
+          <span className="font-extrabold">
+            {loading ? "Please wait..." : mode === "signup" ? "Create my account" : "Sign in"}
+          </span>
           {loading ? <Loader2 size={19} className="animate-spin" /> : <ArrowRight size={18} />}
         </button>
       </form>
@@ -477,16 +464,12 @@ function ForgotPasswordView({
 }) {
   return (
     <>
-      <p className="text-sm font-bold text-[#2c7a49] dark:text-[#8ce6ad]">Account recovery</p>
-      <h1 className="mt-2 text-[34px] font-black leading-[1.02] tracking-[-0.05em] min-[380px]:text-[38px] sm:text-[42px]">
-        Reset your password.
-      </h1>
-      <p className="mt-3 max-w-sm text-sm leading-6 text-black/50 dark:text-white/45">
-        Enter the email connected to your FUTAGO account. We&apos;ll send you a secure reset link.
-      </p>
+      <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#a0efbb]">Account recovery</p>
+      <h2 className="mt-2 text-[30px] font-black tracking-[-0.05em] sm:text-[36px]">Reset your password.</h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-white/50">Enter the email connected to your FUTAGO account.</p>
 
-      <form onSubmit={onSubmit} className="mt-7 space-y-4">
-        <AuthField label="Email" icon={<Mail size={19} />}>
+      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+        <GlassField label="Email" icon={<Mail size={18} />}>
           <input
             type="email"
             value={email}
@@ -496,9 +479,9 @@ function ForgotPasswordView({
             inputMode="email"
             autoCapitalize="none"
             spellCheck={false}
-            className="h-full min-w-0 flex-1 bg-transparent text-base font-medium outline-none placeholder:text-black/30 dark:placeholder:text-white/25"
+            className="h-full min-w-0 flex-1 bg-transparent text-base font-medium text-white outline-none placeholder:text-white/28"
           />
-        </AuthField>
+        </GlassField>
 
         {error && <FeedbackBox text={error} error />}
         {message && <FeedbackBox text={message} />}
@@ -506,9 +489,9 @@ function ForgotPasswordView({
         <button
           type="submit"
           disabled={loading}
-          className="flex min-h-[60px] w-full touch-manipulation items-center justify-between gap-4 rounded-[19px] bg-[#123f29] px-5 py-3 text-white shadow-[0_16px_40px_rgba(18,63,41,0.18)] active:scale-[0.99] disabled:opacity-60 dark:bg-[#89e4aa] dark:text-[#082013]"
+          className="flex min-h-[58px] w-full items-center justify-between rounded-[18px] bg-[#a0efbb] px-5 font-extrabold text-[#082013] disabled:opacity-60"
         >
-          <span className="font-extrabold">{loading ? "Sending reset link..." : "Send reset link"}</span>
+          <span>{loading ? "Sending reset link..." : "Send reset link"}</span>
           {loading ? <Loader2 size={19} className="animate-spin" /> : <ArrowRight size={18} />}
         </button>
 
@@ -516,7 +499,7 @@ function ForgotPasswordView({
           type="button"
           disabled={loading}
           onClick={onBack}
-          className="min-h-[48px] w-full touch-manipulation text-sm font-bold text-[#2f6845] disabled:opacity-50 dark:text-[#91eab0]"
+          className="min-h-11 w-full text-sm font-bold text-[#a0efbb] disabled:opacity-50"
         >
           Back to sign in
         </button>
@@ -525,12 +508,12 @@ function ForgotPasswordView({
   );
 }
 
-function AuthField({ label, icon, children }: { label: string; icon: ReactNode; children: ReactNode }) {
+function GlassField({ label, icon, children }: { label: string; icon: ReactNode; children: ReactNode }) {
   return (
-    <div className="min-w-0">
-      <label className="mb-2 block text-sm font-semibold text-black/65 dark:text-white/65">{label}</label>
-      <div className="flex h-[58px] min-w-0 items-center gap-3 rounded-[18px] border border-black/[0.07] bg-white px-4 shadow-sm focus-within:border-[#4c9967]/40 focus-within:ring-4 focus-within:ring-[#4c9967]/[0.07] dark:border-white/[0.08] dark:bg-white/[0.045]">
-        <span className="shrink-0 text-black/35 dark:text-white/35">{icon}</span>
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-white/65">{label}</label>
+      <div className="flex h-[56px] items-center gap-3 rounded-[17px] border border-white/12 bg-white/[0.07] px-4 backdrop-blur-2xl focus-within:border-[#a0efbb]/35 focus-within:ring-4 focus-within:ring-[#a0efbb]/[0.05]">
+        <span className="shrink-0 text-white/40">{icon}</span>
         {children}
       </div>
     </div>
@@ -541,26 +524,13 @@ function FeedbackBox({ text, error = false }: { text: string; error?: boolean })
   return (
     <div
       role={error ? "alert" : "status"}
-      className={`rounded-[16px] border px-4 py-3 text-sm font-medium leading-5 ${
+      className={`rounded-[15px] border px-4 py-3 text-sm font-medium leading-5 ${
         error
-          ? "border-red-500/15 bg-red-500/[0.07] text-red-700 dark:text-red-300"
-          : "border-emerald-500/15 bg-emerald-500/[0.08] text-emerald-800 dark:text-emerald-200"
+          ? "border-red-300/15 bg-red-400/[0.09] text-red-100"
+          : "border-[#a0efbb]/15 bg-[#a0efbb]/[0.08] text-[#c9f8da]"
       }`}
     >
       {text}
-    </div>
-  );
-}
-
-function DesktopDecoration() {
-  return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute -left-28 top-20 h-80 w-80 rounded-full bg-[#58d68d]/10 blur-3xl" />
-      <div className="absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-[#b8e994]/10 blur-3xl" />
-      <div className="absolute left-[18%] top-[34%] h-px w-[62%] rotate-[-12deg] bg-white/10" />
-      <div className="absolute left-[28%] top-[50%] h-px w-[52%] rotate-[20deg] bg-white/10" />
-      <div className="absolute right-[15%] top-[28%] h-4 w-4 rounded-full border-4 border-[#98f5bd] bg-[#0e3b25] shadow-[0_0_30px_rgba(152,245,189,0.4)]" />
-      <div className="absolute bottom-[28%] left-[20%] h-3 w-3 rounded-full bg-[#f1c75b]" />
     </div>
   );
 }
