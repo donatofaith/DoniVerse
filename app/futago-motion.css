@@ -1,0 +1,180 @@
+/* FUTAGO progressive motion layer.
+   Core content stays visible without this stylesheet or without animation support. */
+
+/* ---------------------------------------------------------
+   Home: turn the animated Explore route dot into a walker.
+   The existing Framer Motion parent still moves along the route;
+   this layer only changes the visual from a dot to a person.
+--------------------------------------------------------- */
+[class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"] {
+  width: 30px !important;
+  height: 34px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 10px rgba(181, 246, 203, 0.55));
+}
+
+[class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 38' fill='none'%3E%3Ccircle cx='17' cy='5.5' r='3.5' fill='%23B5F6CB'/%3E%3Cpath d='M16.5 10.5L13.5 18L19 22.5L22.5 31.5M14 17.5L8.5 23.5M14 18L10.5 30.5M16 12.5L22.5 17.5' stroke='%23B5F6CB' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  animation: futago-walker-bob 0.72s ease-in-out infinite alternate;
+}
+
+[class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 5px;
+  bottom: -2px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(181, 246, 203, 0.22);
+  filter: blur(3px);
+  animation: futago-walker-shadow 0.72s ease-in-out infinite alternate;
+}
+
+@keyframes futago-walker-bob {
+  from { transform: translateY(1px) rotate(-2deg); }
+  to { transform: translateY(-2px) rotate(2deg); }
+}
+
+@keyframes futago-walker-shadow {
+  from { transform: scaleX(1); opacity: 0.55; }
+  to { transform: scaleX(0.72); opacity: 0.28; }
+}
+
+/* ---------------------------------------------------------
+   Journey: subtle entry, status and progress motion.
+   :has() scopes these rules to the Journey page by its unique
+   official FUTA portal link, so other pages are unaffected.
+--------------------------------------------------------- */
+main:has(a[href*="firars.futa.edu.ng"]) header {
+  animation: futago-journey-header-in 420ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+main:has(a[href*="firars.futa.edu.ng"]) > div > section:first-of-type > div:first-child {
+  animation: futago-journey-hero-in 560ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+main:has(a[href*="firars.futa.edu.ng"]) > div > section:first-of-type > aside {
+  animation: futago-journey-aside-in 620ms 70ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+main:has(a[href*="firars.futa.edu.ng"]) article {
+  animation: futago-journey-card-in 520ms cubic-bezier(.2,.8,.2,1) both;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(2) { animation-delay: 45ms; }
+main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(3) { animation-delay: 90ms; }
+main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(4) { animation-delay: 135ms; }
+main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(5) { animation-delay: 180ms; }
+main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(6) { animation-delay: 225ms; }
+main:has(a[href*="firars.futa.edu.ng"]) article:nth-child(7) { animation-delay: 270ms; }
+
+@media (hover: hover) {
+  main:has(a[href*="firars.futa.edu.ng"]) article:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 55px rgba(26, 55, 36, 0.08);
+  }
+}
+
+/* Expanded checklist detail animates into place without hiding core content. */
+main:has(a[href*="firars.futa.edu.ng"]) article > div + div {
+  transform-origin: top center;
+  animation: futago-journey-detail-in 260ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+/* Progress bar gets a restrained highlight pass. */
+main:has(a[href*="firars.futa.edu.ng"]) [class*="h-2.5"][class*="overflow-hidden"] > div {
+  position: relative;
+  overflow: hidden;
+}
+
+main:has(a[href*="firars.futa.edu.ng"]) [class*="h-2.5"][class*="overflow-hidden"] > div::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.42), transparent);
+  animation: futago-progress-shine 3.8s ease-in-out infinite;
+}
+
+/* In-progress status gets a gentle pulse. */
+main:has(a[href*="firars.futa.edu.ng"]) button[class*="bg-[#fff2c8]"] {
+  animation: futago-status-pulse 2.2s ease-in-out infinite;
+}
+
+/* Key Journey action icons breathe slightly. */
+main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#123f29]"] svg,
+main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#153f2a]"] svg {
+  animation: futago-icon-breathe 3.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes futago-journey-header-in {
+  from { transform: translateY(-6px); }
+  to { transform: translateY(0); }
+}
+
+@keyframes futago-journey-hero-in {
+  from { transform: translateY(10px) scale(0.992); }
+  to { transform: translateY(0) scale(1); }
+}
+
+@keyframes futago-journey-aside-in {
+  from { transform: translateY(12px); }
+  to { transform: translateY(0); }
+}
+
+@keyframes futago-journey-card-in {
+  from { transform: translateY(8px); }
+  to { transform: translateY(0); }
+}
+
+@keyframes futago-journey-detail-in {
+  from { transform: translateY(-4px) scaleY(0.985); }
+  to { transform: translateY(0) scaleY(1); }
+}
+
+@keyframes futago-progress-shine {
+  0%, 58% { transform: translateX(-120%); }
+  82%, 100% { transform: translateX(120%); }
+}
+
+@keyframes futago-status-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.045); }
+}
+
+@keyframes futago-icon-breathe {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1.5px) rotate(2deg); }
+}
+
+/* Respect the user's reduced-motion preference everywhere. */
+@media (prefers-reduced-motion: reduce) {
+  [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::before,
+  [class*="bottom-[25%]"][class*="left-[32%]"][class*="bg-[#b5f6cb]"]::after,
+  main:has(a[href*="firars.futa.edu.ng"]) header,
+  main:has(a[href*="firars.futa.edu.ng"]) > div > section:first-of-type > div:first-child,
+  main:has(a[href*="firars.futa.edu.ng"]) > div > section:first-of-type > aside,
+  main:has(a[href*="firars.futa.edu.ng"]) article,
+  main:has(a[href*="firars.futa.edu.ng"]) article > div + div,
+  main:has(a[href*="firars.futa.edu.ng"]) [class*="h-2.5"][class*="overflow-hidden"] > div::after,
+  main:has(a[href*="firars.futa.edu.ng"]) button[class*="bg-[#fff2c8]"],
+  main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#123f29]"] svg,
+  main:has(a[href*="firars.futa.edu.ng"]) [class*="bg-[#153f2a]"] svg {
+    animation: none !important;
+  }
+
+  main:has(a[href*="firars.futa.edu.ng"]) article {
+    transition: none !important;
+  }
+}
