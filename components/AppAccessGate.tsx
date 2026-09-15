@@ -6,7 +6,11 @@ import { GraduationCap } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 
-export const FUTAGO_GUEST_KEY = "futago-guest-mode";
+export const DONIVERSE_GUEST_KEY = "doniverse-guest-mode";
+const LEGACY_GUEST_KEY = "futago-guest-mode";
+
+// Temporary compatibility export while older screens are migrated.
+export const FUTAGO_GUEST_KEY = DONIVERSE_GUEST_KEY;
 
 const FUTA_CAMPUS_IMAGE =
   "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
@@ -54,9 +58,15 @@ export default function AppAccessGate({ children }: { children: ReactNode }) {
         return;
       }
 
-      const guestMode = window.localStorage.getItem(FUTAGO_GUEST_KEY) === "1";
+      const currentGuest = window.localStorage.getItem(DONIVERSE_GUEST_KEY) === "1";
+      const legacyGuest = window.localStorage.getItem(LEGACY_GUEST_KEY) === "1";
 
-      if (guestMode) {
+      if (legacyGuest && !currentGuest) {
+        window.localStorage.setItem(DONIVERSE_GUEST_KEY, "1");
+        window.localStorage.removeItem(LEGACY_GUEST_KEY);
+      }
+
+      if (currentGuest || legacyGuest) {
         setReady(true);
         return;
       }
@@ -78,8 +88,8 @@ export default function AppAccessGate({ children }: { children: ReactNode }) {
           <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#123f29] text-white shadow-[0_18px_50px_rgba(18,63,41,0.18)] dark:bg-[#91eab0] dark:text-[#082013]">
             <GraduationCap size={25} />
           </div>
-          <p className="mt-4 text-xl font-black tracking-[-0.045em]">FUTAGO</p>
-          <p className="mt-1 text-xs text-black/40 dark:text-white/35">Know where to go.</p>
+          <p className="mt-4 text-xl font-black tracking-[-0.045em]">DoniVerse</p>
+          <p className="mt-1 text-xs text-black/40 dark:text-white/35">Your whole campus world, in one place.</p>
           <div className="mt-5 h-1.5 w-20 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
             <div className="h-full w-1/2 animate-pulse rounded-full bg-[#34744c] dark:bg-[#8ce6ad]" />
           </div>
@@ -94,14 +104,14 @@ export default function AppAccessGate({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <div className="futago-campus-background" aria-hidden="true">
+      <div className="doniverse-campus-background" aria-hidden="true">
         <div
-          className="futago-campus-background__image"
+          className="doniverse-campus-background__image"
           style={{ backgroundImage: `url(${FUTA_CAMPUS_IMAGE})` }}
         />
-        <div className="futago-campus-background__veil" />
+        <div className="doniverse-campus-background__veil" />
       </div>
-      <div className="futago-app-surface">{children}</div>
+      <div className="doniverse-app-surface">{children}</div>
     </>
   );
 }
