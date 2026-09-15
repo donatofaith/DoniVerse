@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CalendarDays, ChevronDown, MapPinned, ShieldCheck } from "lucide-react";
+import { CalendarDays, ChevronDown, MapPinned, ShieldCheck, Users } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase/client";
@@ -81,10 +81,11 @@ export default function AdminAccessChip() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-[20px] border border-white/70 bg-white/90 p-2 shadow-[0_20px_60px_rgba(16,46,28,0.18)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/94">
+        <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-[20px] border border-white/70 bg-white/90 p-2 shadow-[0_20px_60px_rgba(16,46,28,0.18)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#0b1410]/94">
           <AdminLink icon={ShieldCheck} label="Admin dashboard" onClick={() => router.push("/admin")} />
           <AdminLink icon={MapPinned} label="Manage places" onClick={() => router.push("/admin/places")} />
           <AdminLink icon={CalendarDays} label="Manage events" onClick={() => router.push("/admin/events")} />
+          <AdminLink icon={Users} label="Manage communities" onClick={() => router.push("/admin/communities")} />
         </div>
       )}
     </div>
