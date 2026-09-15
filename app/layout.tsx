@@ -5,8 +5,8 @@ import AppBottomNavigation from "@/components/AppBottomNavigation";
 import AdminAccessChip from "@/components/AdminAccessChip";
 import BrandingSync from "@/components/BrandingSync";
 import "./globals.css";
-import "./futago-motion.css";
-import "./futago-campus.css";
+import "./doniverse-motion.css";
+import "./doniverse-campus.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
