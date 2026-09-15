@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import AppAccessGate from "@/components/AppAccessGate";
 import AppBottomNavigation from "@/components/AppBottomNavigation";
 import AdminAccessChip from "@/components/AdminAccessChip";
-import BrandingSync from "@/components/BrandingSync";
+import LegacyBrandBridge from "@/components/LegacyBrandBridge";
 import "./globals.css";
 import "./doniverse-motion.css";
 import "./doniverse-campus.css";
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <BrandingSync />
+        <LegacyBrandBridge />
         <AppAccessGate>
           {children}
           <AdminAccessChip />
