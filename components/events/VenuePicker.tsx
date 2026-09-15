@@ -13,7 +13,7 @@ export type CampusVenue = {
   category: string;
   latitude: number;
   longitude: number;
-  source: "futago" | "openstreetmap" | "campus";
+  source: "doniverse" | "openstreetmap" | "campus";
   subtitle?: string | null;
 };
 
@@ -46,7 +46,7 @@ const campusFallbacks: CampusVenue[] = [
     latitude: 7.3013375,
     longitude: 5.138046875,
     source: "campus",
-    subtitle: "Obanla, FUTA",
+    subtitle: "Obanla campus",
   },
 ];
 
@@ -101,7 +101,7 @@ export default function VenuePicker({
       setPlaces(
         ((data ?? []) as Omit<CampusVenue, "source">[]).map((place) => ({
           ...place,
-          source: "futago" as const,
+          source: "doniverse" as const,
         })),
       );
       setLoading(false);
@@ -214,7 +214,7 @@ export default function VenuePicker({
     : null;
 
   return (
-    <div className="block" ref={rootRef}>
+    <div className="venue-picker-root block" ref={rootRef}>
       <span className="text-sm font-bold text-black/60 dark:text-white/60">{label}</span>
 
       <div className="relative mt-2">
@@ -252,12 +252,12 @@ export default function VenuePicker({
 
         {selectedPlace && (
           <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-black text-emerald-800 dark:text-emerald-200">
-            <Check size={13} /> Linked to FUTAGO map
+            <Check size={13} /> Linked to DoniVerse map
           </div>
         )}
 
         {open && (
-          <div className="absolute left-0 right-0 top-[62px] z-[80] max-h-[320px] overflow-y-auto rounded-[20px] border border-white/70 bg-white/95 p-2 shadow-[0_22px_70px_rgba(16,46,28,0.20)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#09130e]/96">
+          <div className="absolute left-0 right-0 top-[62px] z-[120] max-h-[320px] overflow-y-auto rounded-[20px] border border-white/70 bg-white/95 p-2 shadow-[0_22px_70px_rgba(16,46,28,0.20)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#09130e]/96">
             {loading ? (
               <p className="px-3 py-4 text-sm font-semibold text-black/45 dark:text-white/45">Loading campus locations...</p>
             ) : suggestions.length ? (
@@ -278,7 +278,7 @@ export default function VenuePicker({
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-black text-[#102017] dark:text-white">{place.name}</p>
                       <span className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-black/40 dark:bg-white/[0.07] dark:text-white/40">
-                        {place.source === "futago" ? "FUTAGO" : place.source === "campus" ? "Campus" : "Map"}
+                        {place.source === "doniverse" ? "DoniVerse" : place.source === "campus" ? "Campus" : "Map"}
                       </span>
                     </div>
                     <p className="mt-0.5 line-clamp-2 text-xs text-black/42 dark:text-white/38">
