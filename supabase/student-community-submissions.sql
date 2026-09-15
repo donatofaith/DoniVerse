@@ -5,9 +5,72 @@
 begin;
 
 alter table public.communities
-  add column if not exists created_by uuid references auth.users(id) on delete set null;
+  add column if not exists created_by uuid references auth.users(id) on delete set null,
+  add column if not exists image_url text;
 
 create index if not exists communities_created_by_idx on public.communities(created_by);
+
+-- Public bucket for optional community cover images.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'community-images',
+  'community-images',
+  true,
+  2097152,
+  array['image/jpeg','image/png','image/webp']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+-- Everyone may view approved community images because the bucket is public.
+drop policy if exists "Public can read community images" on storage.objects;
+create policy "Public can read community images"
+on storage.objects
+for select
+to public
+using (bucket_id = 'community-images');
+
+-- Signed-in users can upload only inside their own folder.
+drop policy if exists "Students can upload own community images" on storage.objects;
+create policy "Students can upload own community images"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'community-images'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Students may replace/delete only their own uploaded files.
+drop policy if exists "Students can update own community images" on storage.objects;
+create policy "Students can update own community images"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'community-images'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'community-images'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "Students can delete own community images" on storage.objects;
+create policy "Students can delete own community images"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'community-images'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Remove the old function signature so Supabase does not see two overloads.
+drop function if exists public.submit_doniverse_community(text,text,text,text,bigint,text,text);
 
 create or replace function public.submit_doniverse_community(
   p_name text,
@@ -16,7 +79,8 @@ create or replace function public.submit_doniverse_community(
   p_location_name text,
   p_place_id bigint,
   p_contact_url text,
-  p_official_url text
+  p_official_url text,
+  p_image_url text
 )
 returns uuid
 language plpgsql
@@ -61,6 +125,7 @@ begin
     place_id,
     contact_url,
     official_url,
+    image_url,
     status,
     is_verified,
     created_by,
@@ -75,6 +140,7 @@ begin
     p_place_id,
     nullif(trim(p_contact_url), ''),
     nullif(trim(p_official_url), ''),
+    nullif(trim(p_image_url), ''),
     'pending',
     false,
     v_user_id,
@@ -87,7 +153,7 @@ begin
 end;
 $$;
 
-revoke all on function public.submit_doniverse_community(text,text,text,text,bigint,text,text) from public;
-grant execute on function public.submit_doniverse_community(text,text,text,text,bigint,text,text) to authenticated;
+revoke all on function public.submit_doniverse_community(text,text,text,text,bigint,text,text,text) from public;
+grant execute on function public.submit_doniverse_community(text,text,text,text,bigint,text,text,text) to authenticated;
 
 commit;
