@@ -11,8 +11,8 @@ export const FUTAGO_GUEST_KEY = "futago-guest-mode";
 const FUTA_CAMPUS_IMAGE =
   "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
 
-const openRoutes = new Set(["/auth", "/onboarding", "/reset-password"]);
-const immersiveRoutes = new Set(["/auth", "/reset-password"]);
+const openRoutes = new Set(["/auth", "/auth/callback", "/onboarding", "/reset-password"]);
+const immersiveRoutes = new Set(["/auth", "/auth/callback", "/reset-password"]);
 
 export default function AppAccessGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
