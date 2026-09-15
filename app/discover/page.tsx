@@ -8,7 +8,9 @@ import {
   ExternalLink,
   LoaderCircle,
   MapPin,
+  Plus,
   Search,
+  ShieldCheck,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -17,6 +19,7 @@ import { supabase } from "@/lib/supabase/client";
 
 type View = "events" | "communities";
 type LoadState = "loading" | "ready" | "unavailable";
+type CommunityCategory = "all" | "faith" | "academic" | "tech" | "creative" | "volunteering" | "student" | "sports" | "other";
 
 type EventRecord = {
   id: string;
@@ -46,9 +49,22 @@ type CommunityRecord = {
 const FUTA_CAMPUS_IMAGE =
   "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
 
+const communityCategories: { value: CommunityCategory; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "student", label: "Student" },
+  { value: "academic", label: "Academic" },
+  { value: "tech", label: "Tech" },
+  { value: "faith", label: "Faith" },
+  { value: "creative", label: "Creative" },
+  { value: "volunteering", label: "Volunteering" },
+  { value: "sports", label: "Sports" },
+  { value: "other", label: "Other" },
+];
+
 export default function DiscoverPage() {
   const [view, setView] = useState<View>("events");
   const [query, setQuery] = useState("");
+  const [communityCategory, setCommunityCategory] = useState<CommunityCategory>("all");
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [communities, setCommunities] = useState<CommunityRecord[]>([]);
   const [eventState, setEventState] = useState<LoadState>("loading");
@@ -126,14 +142,16 @@ export default function DiscoverPage() {
 
   const filteredCommunities = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return communities;
 
-    return communities.filter((community) =>
-      `${community.name} ${community.category} ${community.description ?? ""} ${community.location_name ?? ""}`
+    return communities.filter((community) => {
+      if (communityCategory !== "all" && community.category !== communityCategory) return false;
+      if (!normalized) return true;
+
+      return `${community.name} ${community.category} ${community.description ?? ""} ${community.location_name ?? ""}`
         .toLowerCase()
-        .includes(normalized),
-    );
-  }, [communities, query]);
+        .includes(normalized);
+    });
+  }, [communities, query, communityCategory]);
 
   return (
     <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#e9efe9] pb-32 text-[#102017] dark:bg-[#050b07] dark:text-white">
@@ -281,13 +299,24 @@ export default function DiscoverPage() {
         ) : (
           <section className="mt-5">
             <div className="rounded-[28px] border border-white/55 bg-white/32 p-5 shadow-[0_22px_65px_rgba(16,46,28,0.09)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04] sm:p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#9bedb7]">
-                <Users size={22} />
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#9bedb7]">
+                    <Users size={22} />
+                  </div>
+                  <h2 className="mt-5 text-[27px] font-black tracking-[-0.045em]">Find your people.</h2>
+                  <p className="mt-2 max-w-[620px] text-sm leading-6 text-black/50 dark:text-white/48">
+                    Student associations, fellowships, academic groups, clubs, creative communities and more.
+                  </p>
+                </div>
+
+                <a
+                  href="/discover/submit-community"
+                  className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-[17px] bg-[#174d31] px-5 text-sm font-black text-white shadow-[0_16px_44px_rgba(23,77,49,0.20)] transition active:scale-[0.99] dark:bg-[#9bedb7] dark:text-[#0b2717]"
+                >
+                  <Plus size={17} /> Add your community
+                </a>
               </div>
-              <h2 className="mt-5 text-[27px] font-black tracking-[-0.045em]">Find your people.</h2>
-              <p className="mt-2 max-w-[620px] text-sm leading-6 text-black/50 dark:text-white/48">
-                Student associations, fellowships, academic groups, clubs, creative communities and more.
-              </p>
             </div>
 
             <div className="mt-4 flex min-h-[58px] items-center gap-3 rounded-[20px] border border-white/60 bg-white/40 px-4 shadow-sm backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
@@ -298,6 +327,23 @@ export default function DiscoverPage() {
                 placeholder="Search communities..."
                 className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-black/30 dark:placeholder:text-white/28"
               />
+            </div>
+
+            <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+              {communityCategories.map((category) => (
+                <button
+                  key={category.value}
+                  type="button"
+                  onClick={() => setCommunityCategory(category.value)}
+                  className={`min-h-10 shrink-0 rounded-full px-4 text-xs font-black transition ${
+                    communityCategory === category.value
+                      ? "bg-[#174d31] text-white dark:bg-[#9bedb7] dark:text-[#0b2717]"
+                      : "border border-white/60 bg-white/40 text-black/48 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/45"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
             </div>
 
             {communityState === "loading" ? (
@@ -313,7 +359,7 @@ export default function DiscoverPage() {
             ) : (
               <div className="mt-5 rounded-[24px] border border-dashed border-white/60 bg-white/26 p-8 text-center backdrop-blur-2xl dark:border-white/[0.08] dark:bg-white/[0.025]">
                 <Users size={22} className="mx-auto text-black/25 dark:text-white/25" />
-                <p className="mt-3 text-sm font-bold">No community matches that search.</p>
+                <p className="mt-3 text-sm font-bold">No community matches those filters.</p>
               </div>
             )}
           </section>
@@ -474,13 +520,20 @@ function CommunityCard({ community }: { community: CommunityRecord }) {
 
   return (
     <article className="rounded-[26px] border border-white/55 bg-white/34 p-5 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
-      <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#8ce6ad]">
-        <Users size={19} />
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#8ce6ad]">
+          <Users size={19} />
+        </div>
+        {community.is_verified && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/15 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-emerald-800 dark:text-emerald-200">
+            <ShieldCheck size={12} /> Verified
+          </span>
+        )}
       </div>
       <p className="mt-5 text-[10px] font-black uppercase tracking-[0.11em] text-[#397151] dark:text-[#8ce6ad]">{community.category}</p>
       <h3 className="mt-1 text-lg font-black tracking-[-0.03em]">{community.name}</h3>
       {community.description && (
-        <p className="mt-2 text-sm leading-6 text-black/45 dark:text-white/40">{community.description}</p>
+        <p className="mt-2 line-clamp-4 text-sm leading-6 text-black/45 dark:text-white/40">{community.description}</p>
       )}
       {community.location_name && (
         <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-black/38 dark:text-white/34">
@@ -492,9 +545,9 @@ function CommunityCard({ community }: { community: CommunityRecord }) {
           href={destination}
           target="_blank"
           rel="noreferrer"
-          className="mt-5 inline-flex min-h-10 items-center gap-2 text-xs font-extrabold text-[#2f7048] dark:text-[#8ce6ad]"
+          className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/45 px-3 text-xs font-extrabold text-[#2f7048] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]"
         >
-          View community <ExternalLink size={13} />
+          Join or learn more <ExternalLink size={13} />
         </a>
       )}
     </article>
