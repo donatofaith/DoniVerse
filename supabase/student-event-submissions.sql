@@ -5,13 +5,11 @@
 
 begin;
 
--- Let signed-in users see events they personally submitted, including pending/rejected.
+-- Pending/rejected submissions must not become readable through the normal
+-- events table just because the submitter is signed in. Discover only exposes
+-- approved content. A dedicated "My submissions" RPC can be added separately
+-- when that screen is built.
 drop policy if exists "Students can read own event submissions" on public.events;
-create policy "Students can read own event submissions"
-on public.events
-for select
-to authenticated
-using (created_by = auth.uid());
 
 -- Student poster uploads are restricted to that user's own submissions folder.
 -- The bucket's MIME type and 2 MB limits still apply.
