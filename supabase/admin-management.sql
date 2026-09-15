@@ -1,11 +1,11 @@
--- FUTAGO admin management
+-- DoniVerse admin management
 -- Run after supabase/admin-foundation.sql.
 -- Lets super admins add/remove other admins securely by email.
 -- Safe to run again: functions and policies are replaced cleanly.
 
 begin;
 
-create or replace function public.is_futago_super_admin(check_user_id uuid default auth.uid())
+create or replace function public.is_doniverse_super_admin(check_user_id uuid default auth.uid())
 returns boolean
 language sql
 stable
@@ -20,19 +20,17 @@ as $$
   );
 $$;
 
-revoke all on function public.is_futago_super_admin(uuid) from public;
-grant execute on function public.is_futago_super_admin(uuid) to authenticated;
+revoke all on function public.is_doniverse_super_admin(uuid) from public;
+grant execute on function public.is_doniverse_super_admin(uuid) to authenticated;
 
--- Super admins can see the full admin membership table.
 drop policy if exists "Super admins can read all admin roles" on public.admin_users;
 create policy "Super admins can read all admin roles"
 on public.admin_users
 for select
 to authenticated
-using (public.is_futago_super_admin());
+using (public.is_doniverse_super_admin());
 
--- Listing is exposed through an RPC so emails can be shown without exposing auth.users directly.
-create or replace function public.list_futago_admins()
+create or replace function public.list_doniverse_admins()
 returns table (
   user_id uuid,
   email text,
@@ -51,20 +49,18 @@ as $$
     au.created_at
   from public.admin_users as au
   left join auth.users as usr on usr.id = au.user_id
-  where public.is_futago_admin(auth.uid())
+  where public.is_doniverse_admin(auth.uid())
   order by
     case when au.role = 'super_admin' then 0 else 1 end,
     au.created_at asc;
 $$;
 
-revoke all on function public.list_futago_admins() from public;
-grant execute on function public.list_futago_admins() to authenticated;
+revoke all on function public.list_doniverse_admins() from public;
+grant execute on function public.list_doniverse_admins() to authenticated;
 
--- Drop the earlier TABLE-returning version first. Returning JSON avoids PL/pgSQL
--- output-column names (email/role/user_id) colliding with database column names.
-drop function if exists public.set_futago_admin_by_email(text, text);
+drop function if exists public.set_doniverse_admin_by_email(text, text);
 
-create function public.set_futago_admin_by_email(
+create function public.set_doniverse_admin_by_email(
   target_email text,
   target_role text default 'admin'
 )
@@ -78,7 +74,7 @@ declare
   v_email text;
   v_role text;
 begin
-  if not public.is_futago_super_admin(auth.uid()) then
+  if not public.is_doniverse_super_admin(auth.uid()) then
     raise exception 'Super admin access required';
   end if;
 
@@ -96,7 +92,7 @@ begin
   limit 1;
 
   if v_user_id is null then
-    raise exception 'No FUTAGO account was found with that email';
+    raise exception 'No DoniVerse account was found with that email';
   end if;
 
   insert into public.admin_users as au (user_id, role)
@@ -112,18 +108,17 @@ begin
 end;
 $$;
 
-revoke all on function public.set_futago_admin_by_email(text, text) from public;
-grant execute on function public.set_futago_admin_by_email(text, text) to authenticated;
+revoke all on function public.set_doniverse_admin_by_email(text, text) from public;
+grant execute on function public.set_doniverse_admin_by_email(text, text) to authenticated;
 
--- Remove an admin. A super admin cannot remove their own access from the UI.
-create or replace function public.remove_futago_admin(target_user_id uuid)
+create or replace function public.remove_doniverse_admin(target_user_id uuid)
 returns void
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
-  if not public.is_futago_super_admin(auth.uid()) then
+  if not public.is_doniverse_super_admin(auth.uid()) then
     raise exception 'Super admin access required';
   end if;
 
@@ -136,7 +131,47 @@ begin
 end;
 $$;
 
+revoke all on function public.remove_doniverse_admin(uuid) from public;
+grant execute on function public.remove_doniverse_admin(uuid) to authenticated;
+
+-- Compatibility wrappers keep current deployed clients working during the rename.
+create or replace function public.is_futago_super_admin(check_user_id uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$ select public.is_doniverse_super_admin(check_user_id); $$;
+
+create or replace function public.list_futago_admins()
+returns table (user_id uuid, email text, role text, created_at timestamptz)
+language sql
+stable
+security definer
+set search_path = public, auth
+as $$ select * from public.list_doniverse_admins(); $$;
+
+create or replace function public.set_futago_admin_by_email(target_email text, target_role text default 'admin')
+returns jsonb
+language sql
+security definer
+set search_path = public, auth
+as $$ select public.set_doniverse_admin_by_email(target_email, target_role); $$;
+
+create or replace function public.remove_futago_admin(target_user_id uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$ select public.remove_doniverse_admin(target_user_id); $$;
+
+revoke all on function public.is_futago_super_admin(uuid) from public;
+revoke all on function public.list_futago_admins() from public;
+revoke all on function public.set_futago_admin_by_email(text, text) from public;
 revoke all on function public.remove_futago_admin(uuid) from public;
+grant execute on function public.is_futago_super_admin(uuid) to authenticated;
+grant execute on function public.list_futago_admins() to authenticated;
+grant execute on function public.set_futago_admin_by_email(text, text) to authenticated;
 grant execute on function public.remove_futago_admin(uuid) to authenticated;
 
 commit;
