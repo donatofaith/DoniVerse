@@ -4,6 +4,7 @@ import AppAccessGate from "@/components/AppAccessGate";
 import AppBottomNavigation from "@/components/AppBottomNavigation";
 import AdminAccessChip from "@/components/AdminAccessChip";
 import LegacyBrandBridge from "@/components/LegacyBrandBridge";
+import StudentEventSubmitChip from "@/components/StudentEventSubmitChip";
 import "./globals.css";
 import "./doniverse-motion.css";
 import "./doniverse-campus.css";
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AppAccessGate>
           {children}
           <AdminAccessChip />
+          <StudentEventSubmitChip />
           <AppBottomNavigation />
         </AppAccessGate>
       </body>
