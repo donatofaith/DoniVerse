@@ -1,14 +1,16 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CheckCircle2,
+  ImagePlus,
   Loader2,
   Send,
   ShieldCheck,
   Users,
+  X,
 } from "lucide-react";
 
 import VenuePicker, { type CampusVenue } from "@/components/events/VenuePicker";
@@ -55,6 +57,17 @@ const categories: { value: CommunityCategory; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+function safeFileName(name: string) {
+  const extension = name.split(".").pop()?.toLowerCase() || "jpg";
+  const base = name
+    .replace(/\.[^/.]+$/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return `${base || "community"}.${extension}`;
+}
+
 function errorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error !== null && "message" in error) {
@@ -66,7 +79,10 @@ function errorMessage(error: unknown) {
 export default function SubmitCommunityPage() {
   const router = useRouter();
   const [checkingSession, setCheckingSession] = useState(true);
+  const [userId, setUserId] = useState("");
   const [form, setForm] = useState<CommunityForm>(emptyForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -83,6 +99,7 @@ export default function SubmitCommunityPage() {
         return;
       }
 
+      setUserId(data.session.user.id);
       setCheckingSession(false);
     }
 
@@ -91,6 +108,53 @@ export default function SubmitCommunityPage() {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
+  const chooseImage = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Choose a JPG, PNG or WebP image.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Community image must be 2 MB or smaller.");
+      return;
+    }
+
+    if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setError("");
+  };
+
+  const removeImage = () => {
+    if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview("");
+  };
+
+  const uploadImage = async () => {
+    if (!imageFile) return null;
+
+    const path = `${userId}/submissions/${Date.now()}-${safeFileName(imageFile.name)}`;
+    const { error: uploadError } = await supabase.storage
+      .from("community-images")
+      .upload(path, imageFile, { cacheControl: "3600", upsert: false });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from("community-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   const submitCommunity = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -103,6 +167,8 @@ export default function SubmitCommunityPage() {
     setError("");
 
     try {
+      const imageUrl = await uploadImage();
+
       const { error: submitError } = await supabase.rpc("submit_doniverse_community", {
         p_name: name,
         p_category: form.category,
@@ -111,10 +177,14 @@ export default function SubmitCommunityPage() {
         p_place_id: form.placeId,
         p_contact_url: form.contactUrl.trim() || "",
         p_official_url: form.officialUrl.trim() || "",
+        p_image_url: imageUrl || "",
       });
 
       if (submitError) throw submitError;
 
+      if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+      setImageFile(null);
+      setImagePreview("");
       setForm(emptyForm);
       setSubmitted(true);
     } catch (caughtError) {
@@ -147,18 +217,10 @@ export default function SubmitCommunityPage() {
             DoniVerse will review it before it appears publicly in Discover.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <button
-              type="button"
-              onClick={() => setSubmitted(false)}
-              className="min-h-12 rounded-[16px] border border-white/65 bg-white/55 px-5 text-sm font-black text-[#214f34] dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
-            >
+            <button type="button" onClick={() => setSubmitted(false)} className="min-h-12 rounded-[16px] border border-white/65 bg-white/55 px-5 text-sm font-black text-[#214f34] dark:border-white/10 dark:bg-white/[0.06] dark:text-white">
               Submit another
             </button>
-            <button
-              type="button"
-              onClick={() => router.replace("/discover")}
-              className="min-h-12 rounded-[16px] bg-[#174d31] px-5 text-sm font-black text-white shadow-lg dark:bg-[#9bedb7] dark:text-[#0b2717]"
-            >
+            <button type="button" onClick={() => router.replace("/discover")} className="min-h-12 rounded-[16px] bg-[#174d31] px-5 text-sm font-black text-white shadow-lg dark:bg-[#9bedb7] dark:text-[#0b2717]">
               Back to Discover
             </button>
           </div>
@@ -171,12 +233,7 @@ export default function SubmitCommunityPage() {
     <main className="relative min-h-[100dvh] bg-transparent pb-28 text-[#102017] dark:text-white">
       <div className="mx-auto w-full max-w-[880px] px-4 pb-10 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:px-8">
         <header className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/65 bg-white/50 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]"
-            aria-label="Back"
-          >
+          <button type="button" onClick={() => router.back()} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/65 bg-white/50 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.06]" aria-label="Back">
             <ArrowLeft size={18} />
           </button>
           <div className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/60 bg-white/45 px-4 text-xs font-black text-[#397151] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.05] dark:text-[#9bedb7]">
@@ -202,88 +259,61 @@ export default function SubmitCommunityPage() {
         <form onSubmit={submitCommunity} className="mt-5 space-y-4">
           <FormCard title="Community details">
             <Field label="Community name">
-              <input
-                value={form.name}
-                onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="e.g. Google Developer Student Club"
-                className="input-shell"
-                maxLength={140}
-              />
+              <input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="e.g. Google Developer Student Club" className="input-shell" maxLength={140} />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Category">
-                <select
-                  value={form.category}
-                  onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as CommunityCategory }))}
-                  className="input-shell"
-                >
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>{category.label}</option>
-                  ))}
+                <select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as CommunityCategory }))} className="input-shell">
+                  {categories.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}
                 </select>
               </Field>
             </div>
 
             <Field label="Description">
-              <textarea
-                value={form.description}
-                onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-                placeholder="What is this community about and who is it for?"
-                className="input-shell min-h-36 resize-y py-4"
-                maxLength={1500}
-              />
+              <textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="What is this community about and who is it for?" className="input-shell min-h-36 resize-y py-4" maxLength={1500} />
             </Field>
+          </FormCard>
+
+          <FormCard title="Community picture">
+            <div>
+              <p className="text-sm font-bold text-black/60 dark:text-white/60">Photo or cover image (optional)</p>
+              <p className="mt-1 text-xs leading-5 text-black/42 dark:text-white/36">Add a photo of the church, club, team, meeting space or a community cover image.</p>
+
+              {imagePreview ? (
+                <div className="relative mt-3 overflow-hidden rounded-[22px] border border-white/65 bg-white/40 dark:border-white/10 dark:bg-white/[0.04]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imagePreview} alt="Community image preview" className="max-h-[460px] w-full object-cover" />
+                  <button type="button" onClick={removeImage} className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/55 text-white backdrop-blur-xl" aria-label="Remove community image">
+                    <X size={17} />
+                  </button>
+                </div>
+              ) : (
+                <label className="mt-3 flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-white/70 bg-white/36 px-5 text-center text-sm font-black text-[#397151] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.035] dark:text-[#9bedb7]">
+                  <ImagePlus size={22} />
+                  Add community picture
+                  <span className="text-[11px] font-semibold text-black/38 dark:text-white/34">JPG, PNG or WebP · max 2 MB</span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseImage} className="sr-only" />
+                </label>
+              )}
+            </div>
           </FormCard>
 
           <FormCard title="Where students can find you">
-            <VenuePicker
-              value={form.locationName}
-              selectedPlaceId={form.placeId}
-              onChange={(value) => setForm((current) => ({ ...current, locationName: value }))}
-              onSelect={(place: CampusVenue) =>
-                setForm((current) => ({
-                  ...current,
-                  locationName: place.name,
-                  placeId: place.id,
-                }))
-              }
-              onClearSelection={() => setForm((current) => ({ ...current, placeId: null }))}
-              label="Meeting location (optional)"
-            />
+            <VenuePicker value={form.locationName} selectedPlaceId={form.placeId} onChange={(value) => setForm((current) => ({ ...current, locationName: value }))} onSelect={(place: CampusVenue) => setForm((current) => ({ ...current, locationName: place.name, placeId: place.id }))} onClearSelection={() => setForm((current) => ({ ...current, placeId: null }))} label="Meeting location (optional)" />
 
             <Field label="Join or contact link (optional)">
-              <input
-                type="url"
-                value={form.contactUrl}
-                onChange={(event) => setForm((current) => ({ ...current, contactUrl: event.target.value }))}
-                placeholder="WhatsApp, Telegram, Discord, Instagram or form link"
-                className="input-shell"
-              />
+              <input type="url" value={form.contactUrl} onChange={(event) => setForm((current) => ({ ...current, contactUrl: event.target.value }))} placeholder="WhatsApp, Telegram, Discord, Instagram or form link" className="input-shell" />
             </Field>
 
             <Field label="Official website (optional)">
-              <input
-                type="url"
-                value={form.officialUrl}
-                onChange={(event) => setForm((current) => ({ ...current, officialUrl: event.target.value }))}
-                placeholder="https://..."
-                className="input-shell"
-              />
+              <input type="url" value={form.officialUrl} onChange={(event) => setForm((current) => ({ ...current, officialUrl: event.target.value }))} placeholder="https://..." className="input-shell" />
             </Field>
           </FormCard>
 
-          {error && (
-            <div className="rounded-[18px] border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm font-semibold text-red-700 backdrop-blur-2xl dark:text-red-300">
-              {error}
-            </div>
-          )}
+          {error && <div className="rounded-[18px] border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm font-semibold text-red-700 backdrop-blur-2xl dark:text-red-300">{error}</div>}
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[19px] bg-[#174d31] px-5 text-sm font-black text-white shadow-[0_18px_50px_rgba(23,77,49,0.22)] transition active:scale-[0.995] disabled:opacity-60 dark:bg-[#9bedb7] dark:text-[#0b2717]"
-          >
+          <button type="submit" disabled={saving} className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[19px] bg-[#174d31] px-5 text-sm font-black text-white shadow-[0_18px_50px_rgba(23,77,49,0.22)] transition active:scale-[0.995] disabled:opacity-60 dark:bg-[#9bedb7] dark:text-[#0b2717]">
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             {saving ? "Submitting..." : "Submit for review"}
           </button>
