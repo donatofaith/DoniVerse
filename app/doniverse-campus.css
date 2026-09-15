@@ -1,0 +1,51 @@
+.doniverse-campus-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #dfe7e0;
+  pointer-events: none;
+}
+
+.doniverse-campus-background__image {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.025);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.doniverse-campus-background__veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(240, 246, 241, 0.74);
+  backdrop-filter: blur(2px);
+}
+
+.doniverse-app-surface {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+}
+
+/* Shared campus backdrop for signed-in and guest app pages. */
+.doniverse-app-surface > main {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.doniverse-app-surface > main > [aria-hidden="true"].fixed,
+.doniverse-app-surface > main > [aria-hidden="true"][class*="fixed"] {
+  display: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .doniverse-campus-background {
+    background: #07100b;
+  }
+
+  .doniverse-campus-background__veil {
+    background: rgba(6, 14, 9, 0.72);
+  }
+}
