@@ -144,7 +144,11 @@ export default function DiscoverPage() {
 
   return (
     <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#e9efe9] pb-32 text-[#102017] dark:bg-[#050b07] dark:text-white">
-      <div className="pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.24] dark:opacity-[0.16]" style={{ backgroundImage: `url(${CAMPUS_IMAGE})` }} aria-hidden="true" />
+      <div
+        className="pointer-events-none fixed inset-0 bg-cover bg-center opacity-[0.24] dark:opacity-[0.16]"
+        style={{ backgroundImage: `url(${CAMPUS_IMAGE})` }}
+        aria-hidden="true"
+      />
       <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(180deg,rgba(244,248,244,0.80)_0%,rgba(236,243,238,0.92)_40%,rgba(228,237,231,0.97)_100%)] dark:bg-[linear-gradient(180deg,rgba(5,11,7,0.72)_0%,rgba(5,11,7,0.90)_42%,rgba(5,11,7,0.97)_100%)]" aria-hidden="true" />
 
       <div className="relative mx-auto w-full max-w-[1120px] px-4 pb-8 pt-5 sm:px-6 md:px-8 lg:px-10">
@@ -159,40 +163,20 @@ export default function DiscoverPage() {
           <p className="mt-4 max-w-[650px] text-sm leading-6 text-black/48 dark:text-white/42">See what&apos;s happening around campus and find communities you can join.</p>
           <div className="mt-5 inline-flex rounded-[18px] border border-white/60 bg-white/34 p-1.5 dark:border-white/[0.08] dark:bg-white/[0.04]">
             {(["events", "communities"] as View[]).map((item) => (
-              <button key={item} type="button" onClick={() => setView(item)} className={`min-h-11 rounded-[13px] px-5 text-sm font-extrabold capitalize transition ${view === item ? "border border-white/65 bg-white/60 text-[#214f34] shadow-sm dark:border-white/[0.08] dark:bg-white/[0.08] dark:text-white" : "text-black/42 dark:text-white/42"}`}>{item}</button>
+              <button
+                key={item}
+                type="button"
+                onClick={() => setView(item)}
+                className={`min-h-11 rounded-[13px] px-5 text-sm font-extrabold capitalize transition ${view === item ? "border border-white/65 bg-white/60 text-[#214f34] shadow-sm dark:border-white/[0.08] dark:bg-white/[0.08] dark:text-white" : "text-black/42 dark:text-white/42"}`}
+              >
+                {item}
+              </button>
             ))}
           </div>
         </header>
 
         {view === "events" ? (
-          <>
-            <section className="mt-5 rounded-[30px] border border-white/55 bg-white/32 p-5 shadow-[0_24px_70px_rgba(16,46,28,0.10)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04] sm:p-7">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/38 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#2d6d47] dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#a9efc1]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#65b886]" /> Campus pulse</div>
-                  <h2 className="mt-4 max-w-[560px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">Don&apos;t miss what&apos;s happening on campus.</h2>
-                  <p className="mt-3 max-w-[610px] text-sm leading-6 text-black/50 dark:text-white/48">Posters first, then the details you need: time, venue and organiser.</p>
-                </div>
-                <a href="/discover/submit-event" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-[17px] bg-[#174d31] px-5 text-sm font-black text-white shadow-[0_16px_44px_rgba(23,77,49,0.20)] dark:bg-[#9bedb7] dark:text-[#0b2717]"><Plus size={17} /> Add an event</a>
-              </div>
-              <a href="#upcoming" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-extrabold text-[#214f34] dark:text-[#9bedb7]">See upcoming <ArrowRight size={17} /></a>
-            </section>
-
-            {eventState === "loading" ? <LoadingCard label="Loading campus events" /> : eventState === "unavailable" ? <UnavailableCard label="events" /> : (
-              <>
-                <section className="mt-5 grid gap-4 md:grid-cols-2">
-                  <EventGroupCard eyebrow="Happening now" title={eventGroups.happeningNow.length ? `${eventGroups.happeningNow.length} live ${eventGroups.happeningNow.length === 1 ? "event" : "events"}` : "Nothing happening right now"} description={eventGroups.happeningNow.length ? "See the poster, time, venue and organiser below." : "Check back soon for events happening around campus."} icon={<Clock3 size={20} />} />
-                  <EventGroupCard eyebrow="This week" title={eventGroups.thisWeek.length ? `${eventGroups.thisWeek.length} coming up this week` : "Nothing on the calendar this week"} description="See what's coming up over the next seven days." icon={<CalendarDays size={20} />} />
-                </section>
-                {eventGroups.happeningNow.length > 0 && <EventList title="Happening now" events={eventGroups.happeningNow} />}
-                {eventGroups.thisWeek.length > 0 && <EventList title="This week" events={eventGroups.thisWeek} />}
-                <section id="upcoming" className="mt-7">
-                  <div className="mb-4"><p className="text-xs font-extrabold uppercase tracking-[0.13em] text-[#397151] dark:text-[#8ce6ad]">Coming up</p><h2 className="mt-1 text-xl font-black">Upcoming events</h2></div>
-                  {eventGroups.upcoming.length > 0 ? <div className="grid gap-4 md:grid-cols-2">{eventGroups.upcoming.map((event) => <EventCard key={event.id} event={event} />)}</div> : <EmptyCard icon={<CalendarDays size={22} />} title="No upcoming events right now." />}
-                </section>
-              </>
-            )}
-          </>
+          <EventsView events={eventGroups} state={eventState} />
         ) : (
           <section className="mt-5">
             <div className="rounded-[28px] border border-white/55 bg-white/32 p-5 shadow-[0_22px_65px_rgba(16,46,28,0.09)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04] sm:p-6">
@@ -206,11 +190,35 @@ export default function DiscoverPage() {
               </div>
             </div>
 
-            <div className="mt-4 flex min-h-[58px] items-center gap-3 rounded-[20px] border border-white/60 bg-white/40 px-4 dark:border-white/[0.08] dark:bg-white/[0.04]"><Search size={18} className="text-black/35 dark:text-white/35" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search communities..." className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-black/30 dark:placeholder:text-white/28" /></div>
+            <div className="mt-4 flex min-h-[58px] items-center gap-3 rounded-[20px] border border-white/60 bg-white/40 px-4 dark:border-white/[0.08] dark:bg-white/[0.04]">
+              <Search size={18} className="text-black/35 dark:text-white/35" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search communities..." className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-black/30 dark:placeholder:text-white/28" />
+            </div>
 
-            <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">{communityCategories.map((category) => <button key={category.value} type="button" onClick={() => setCommunityCategory(category.value)} className={`min-h-10 shrink-0 rounded-full px-4 text-xs font-black ${communityCategory === category.value ? "bg-[#174d31] text-white dark:bg-[#9bedb7] dark:text-[#0b2717]" : "border border-white/60 bg-white/40 text-black/48 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/45"}`}>{category.label}</button>)}</div>
+            <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+              {communityCategories.map((category) => (
+                <button
+                  key={category.value}
+                  type="button"
+                  onClick={() => setCommunityCategory(category.value)}
+                  className={`min-h-10 shrink-0 rounded-full px-4 text-xs font-black ${communityCategory === category.value ? "bg-[#174d31] text-white dark:bg-[#9bedb7] dark:text-[#0b2717]" : "border border-white/60 bg-white/40 text-black/48 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/45"}`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
 
-            {communityState === "loading" ? <LoadingCard label="Loading communities" /> : communityState === "unavailable" ? <UnavailableCard label="communities" /> : filteredCommunities.length ? <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{filteredCommunities.map((community) => <CommunityCard key={community.id} community={community} />)}</div> : <EmptyCard icon={<Users size={22} />} title="No community matches those filters." />}
+            {communityState === "loading" ? (
+              <LoadingCard label="Loading communities" />
+            ) : communityState === "unavailable" ? (
+              <UnavailableCard label="communities" />
+            ) : filteredCommunities.length ? (
+              <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredCommunities.map((community) => <CommunityCard key={community.id} community={community} />)}
+              </div>
+            ) : (
+              <EmptyCard icon={<Users size={22} />} title="No community matches those filters." />
+            )}
           </section>
         )}
       </div>
@@ -218,12 +226,62 @@ export default function DiscoverPage() {
   );
 }
 
+function EventsView({
+  events,
+  state,
+}: {
+  events: { happeningNow: EventRecord[]; thisWeek: EventRecord[]; upcoming: EventRecord[] };
+  state: LoadState;
+}) {
+  return (
+    <>
+      <section className="mt-5 rounded-[30px] border border-white/55 bg-white/32 p-5 shadow-[0_24px_70px_rgba(16,46,28,0.10)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04] sm:p-7">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/38 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#2d6d47] dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#a9efc1]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#65b886]" /> Campus pulse</div>
+            <h2 className="mt-4 max-w-[560px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">Don&apos;t miss what&apos;s happening on campus.</h2>
+            <p className="mt-3 max-w-[610px] text-sm leading-6 text-black/50 dark:text-white/48">Posters first, then the details you need: time, venue and organiser.</p>
+          </div>
+          <a href="/discover/submit-event" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-[17px] bg-[#174d31] px-5 text-sm font-black text-white shadow-[0_16px_44px_rgba(23,77,49,0.20)] dark:bg-[#9bedb7] dark:text-[#0b2717]"><Plus size={17} /> Add an event</a>
+        </div>
+        <a href="#upcoming" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-extrabold text-[#214f34] dark:text-[#9bedb7]">See upcoming <ArrowRight size={17} /></a>
+      </section>
+
+      {state === "loading" ? (
+        <LoadingCard label="Loading campus events" />
+      ) : state === "unavailable" ? (
+        <UnavailableCard label="events" />
+      ) : (
+        <>
+          <section className="mt-5 grid gap-4 md:grid-cols-2">
+            <EventGroupCard eyebrow="Happening now" title={events.happeningNow.length ? `${events.happeningNow.length} live ${events.happeningNow.length === 1 ? "event" : "events"}` : "Nothing happening right now"} description={events.happeningNow.length ? "See the poster, time, venue and organiser below." : "Check back soon for events happening around campus."} icon={<Clock3 size={20} />} />
+            <EventGroupCard eyebrow="This week" title={events.thisWeek.length ? `${events.thisWeek.length} coming up this week` : "Nothing on the calendar this week"} description="See what's coming up over the next seven days." icon={<CalendarDays size={20} />} />
+          </section>
+          {events.happeningNow.length > 0 && <EventList title="Happening now" events={events.happeningNow} />}
+          {events.thisWeek.length > 0 && <EventList title="This week" events={events.thisWeek} />}
+          <section id="upcoming" className="mt-7">
+            <div className="mb-4"><p className="text-xs font-extrabold uppercase tracking-[0.13em] text-[#397151] dark:text-[#8ce6ad]">Coming up</p><h2 className="mt-1 text-xl font-black">Upcoming events</h2></div>
+            {events.upcoming.length ? <div className="grid gap-4 md:grid-cols-2">{events.upcoming.map((event) => <EventCard key={event.id} event={event} />)}</div> : <EmptyCard icon={<CalendarDays size={22} />} title="No upcoming events right now." />}
+          </section>
+        </>
+      )}
+    </>
+  );
+}
+
 function EventGroupCard({ eyebrow, title, description, icon }: { eyebrow: string; title: string; description: string; icon: React.ReactNode }) {
-  return <article className="rounded-[26px] border border-white/55 bg-white/34 p-5 backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]"><div className="flex items-start gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#8ce6ad]">{icon}</div><div><p className="text-[11px] font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/35">{eyebrow}</p><h2 className="mt-2 text-lg font-black">{title}</h2><p className="mt-2 text-sm leading-6 text-black/45 dark:text-white/40">{description}</p></div></div></article>;
+  return (
+    <article className="rounded-[26px] border border-white/55 bg-white/34 p-5 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
+      <div className="flex items-start gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[15px] border border-white/60 bg-white/48 text-[#34744c] dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-[#8ce6ad]">{icon}</div>
+        <div><p className="text-[11px] font-black uppercase tracking-[0.12em] text-black/35 dark:text-white/35">{eyebrow}</p><h2 className="mt-2 text-lg font-black">{title}</h2><p className="mt-2 text-sm leading-6 text-black/45 dark:text-white/40">{description}</p></div>
+      </div>
+    </article>
+  );
 }
 
 function EventList({ title, events }: { title: string; events: EventRecord[] }) {
-  return <section className="mt-7"><h2 className="text-xl font-black">{title}</h2><div className="mt-4 grid gap-4 md:grid-cols-2">{events.map((event) => <EventCard key={event.id} event={event} />)}</div></section>;
+  return <section className="mt-7"><h2 className="text-xl font-black tracking-[-0.035em]">{title}</h2><div className="mt-4 grid gap-4 md:grid-cols-2">{events.map((event) => <EventCard key={event.id} event={event} />)}</div></section>;
 }
 
 function EventCard({ event }: { event: EventRecord }) {
@@ -235,41 +293,60 @@ function EventCard({ event }: { event: EventRecord }) {
 
   return (
     <article className="overflow-hidden rounded-[28px] border border-white/55 bg-white/38 shadow-[0_18px_54px_rgba(16,46,28,0.09)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.045]">
-      {event.image_url ? <img src={event.image_url} alt={`${event.title} event poster`} loading="lazy" className="aspect-[4/5] max-h-[520px] w-full bg-black/10 object-contain" /> : <div className="flex min-h-[150px] items-center justify-center border-b border-white/45"><CalendarDays size={24} className="text-[#397151]/55" /></div>}
+      {event.image_url ? (
+        <div className="relative overflow-hidden border-b border-white/45 bg-black/[0.04] dark:border-white/[0.06] dark:bg-black/20">
+          <div className="absolute inset-0 scale-110 bg-cover bg-center opacity-20 blur-2xl" style={{ backgroundImage: `url(${event.image_url})` }} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={event.image_url} alt={`${event.title} event poster`} loading="lazy" className="relative mx-auto aspect-[4/5] max-h-[520px] w-full object-contain" />
+        </div>
+      ) : (
+        <div className="flex min-h-[150px] items-center justify-center border-b border-white/45 bg-white/22 dark:border-white/[0.06] dark:bg-white/[0.02]"><CalendarDays size={24} className="text-[#397151]/55 dark:text-[#8ce6ad]/60" /></div>
+      )}
       <div className="p-5 sm:p-6">
-        <div className="flex items-center justify-between gap-3"><span className="rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[10px] font-black uppercase text-[#397151] dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]">{event.event_type}</span>{event.is_featured && <span className="text-[10px] font-black uppercase text-[#8a6d20]">Featured</span>}</div>
-        <h3 className="mt-4 text-xl font-black">{event.title}</h3>
+        <div className="flex items-center justify-between gap-3"><span className="rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#397151] dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]">{event.event_type}</span>{event.is_featured && <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#8a6d20] dark:text-[#e0c563]">Featured</span>}</div>
+        <h3 className="mt-4 text-xl font-black tracking-[-0.035em]">{event.title}</h3>
         {event.description && <p className="mt-2 line-clamp-3 text-sm leading-6 text-black/45 dark:text-white/40">{event.description}</p>}
-        <div className="mt-5 space-y-2 text-xs font-semibold text-black/48 dark:text-white/42"><div className="flex items-center gap-2"><CalendarDays size={14} />{date}</div><div className="flex items-center gap-2"><Clock3 size={14} />{startTime}{endTime ? ` – ${endTime}` : ""}</div>{event.venue_name && <div className="flex items-center gap-2"><MapPin size={14} />{event.venue_name}</div>}</div>
-        <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/55 pt-4 dark:border-white/[0.06]"><div><p className="text-[10px] font-black uppercase text-black/30 dark:text-white/28">Organiser</p><p className="mt-1 text-xs font-bold">{event.organizer_name}</p></div>{event.official_url && <a href={event.official_url} target="_blank" rel="noreferrer" className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/48 px-3 text-xs font-extrabold dark:border-white/[0.08] dark:bg-white/[0.06]">More info <ExternalLink size={13} /></a>}</div>
+        <div className="mt-5 space-y-2 text-xs font-semibold text-black/48 dark:text-white/42">
+          <div className="flex items-center gap-2"><CalendarDays size={14} className="text-[#397151] dark:text-[#8ce6ad]" />{date}</div>
+          <div className="flex items-center gap-2"><Clock3 size={14} className="text-[#397151] dark:text-[#8ce6ad]" />{startTime}{endTime ? ` – ${endTime}` : ""}</div>
+          {event.venue_name && <div className="flex items-center gap-2"><MapPin size={14} className="text-[#397151] dark:text-[#8ce6ad]" />{event.venue_name}</div>}
+        </div>
+        <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/55 pt-4 dark:border-white/[0.06]">
+          <div><p className="text-[10px] font-black uppercase tracking-[0.1em] text-black/30 dark:text-white/28">Organiser</p><p className="mt-1 text-xs font-bold">{event.organizer_name}</p></div>
+          {event.official_url && <a href={event.official_url} target="_blank" rel="noreferrer" className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/48 px-3 text-xs font-extrabold text-[#214f34] dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white">More info <ExternalLink size={13} /></a>}
+        </div>
       </div>
     </article>
   );
 }
 
 function CommunityCard({ community }: { community: CommunityRecord }) {
-  const destination = community.official_url || community.contact_url;
-
   return (
     <article className="overflow-hidden rounded-[26px] border border-white/55 bg-white/34 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
       {community.image_url ? (
-        <div className="relative aspect-[16/10] overflow-hidden bg-black/[0.05]">
+        <div className="relative aspect-[16/10] overflow-hidden bg-black/[0.05] dark:bg-black/20">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={community.image_url} alt={`${community.name} community`} loading="lazy" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
         </div>
       ) : (
-        <div className="flex aspect-[16/8] items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(140,230,173,0.18),transparent_45%)]"><Users size={28} className="text-[#34744c]/55 dark:text-[#8ce6ad]/60" /></div>
+        <div className="flex aspect-[16/10] items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(155,237,183,0.22),transparent_48%),linear-gradient(145deg,rgba(255,255,255,0.28),rgba(255,255,255,0.08))] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(155,237,183,0.10),transparent_48%),linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))]"><Users size={34} className="text-[#34744c]/55 dark:text-[#8ce6ad]/60" /></div>
       )}
+
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.11em] text-[#397151] dark:text-[#8ce6ad]">{community.category}</p>
-          {community.is_verified && <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/15 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black uppercase text-emerald-800 dark:text-emerald-200"><ShieldCheck size={12} /> Verified</span>}
+          <div><p className="text-[10px] font-black uppercase tracking-[0.11em] text-[#397151] dark:text-[#8ce6ad]">{community.category}</p><h3 className="mt-1 text-lg font-black tracking-[-0.03em]">{community.name}</h3></div>
+          {community.is_verified && <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/15 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-emerald-800 dark:text-emerald-200"><ShieldCheck size={12} /> Verified</span>}
         </div>
-        <h3 className="mt-2 text-lg font-black">{community.name}</h3>
-        {community.description && <p className="mt-2 line-clamp-4 text-sm leading-6 text-black/45 dark:text-white/40">{community.description}</p>}
+
+        {community.description && <p className="mt-2 line-clamp-3 text-sm leading-6 text-black/45 dark:text-white/40">{community.description}</p>}
         {community.location_name && <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-black/38 dark:text-white/34"><MapPin size={14} /> {community.location_name}</div>}
-        {destination && <a href={destination} target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/45 px-3 text-xs font-extrabold text-[#2f7048] dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]">Join or learn more <ExternalLink size={13} /></a>}
+
+        <a
+          href={`/discover/community/${community.id}`}
+          className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[15px] bg-[#174d31] px-4 text-xs font-black text-white shadow-sm dark:bg-[#9bedb7] dark:text-[#0b2717]"
+        >
+          View community <ArrowRight size={14} />
+        </a>
       </div>
     </article>
   );
@@ -280,7 +357,7 @@ function LoadingCard({ label }: { label: string }) {
 }
 
 function UnavailableCard({ label }: { label: "events" | "communities" }) {
-  return <div className="mt-6 rounded-[24px] border border-white/55 bg-white/28 p-6 text-center backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.03]"><p className="text-sm font-black">We couldn&apos;t load {label} right now.</p><p className="mt-2 text-xs text-black/38 dark:text-white/32">Check your connection and try again.</p></div>;
+  return <div className="mt-6 rounded-[24px] border border-white/55 bg-white/28 p-6 text-center backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.03]"><p className="text-sm font-black">We couldn&apos;t load {label} right now.</p><p className="mt-2 text-xs text-black/38 dark:text-white/32">Check your connection and try again in a moment.</p></div>;
 }
 
 function EmptyCard({ icon, title }: { icon: React.ReactNode; title: string }) {
