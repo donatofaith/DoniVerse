@@ -28,6 +28,7 @@ type EventRecord = {
   venue_name: string | null;
   organizer_name: string;
   official_url: string | null;
+  image_url: string | null;
   is_featured: boolean;
 };
 
@@ -61,7 +62,7 @@ export default function DiscoverPage() {
         supabase
           .from("events")
           .select(
-            "id,title,description,event_type,starts_at,ends_at,venue_name,organizer_name,official_url,is_featured",
+            "id,title,description,event_type,starts_at,ends_at,venue_name,organizer_name,official_url,image_url,is_featured",
           )
           .order("starts_at", { ascending: true }),
         supabase
@@ -153,7 +154,7 @@ export default function DiscoverPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#397151] dark:text-[#8ce6ad]">
-                <Compass size={15} /> Discover FUTA
+                <Compass size={15} /> Discover DoniVerse
               </div>
               <h1 className="mt-2 text-[36px] font-black leading-none tracking-[-0.055em] sm:text-[48px]">
                 What&apos;s happening,
@@ -195,10 +196,10 @@ export default function DiscoverPage() {
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[#65b886] dark:bg-[#9bedb7]" /> Campus pulse
               </div>
               <h2 className="mt-4 max-w-[560px] text-[28px] font-black leading-[1.02] tracking-[-0.045em] sm:text-[36px]">
-                Don&apos;t miss what&apos;s happening at FUTA.
+                Don&apos;t miss what&apos;s happening on campus.
               </h2>
               <p className="mt-3 max-w-[610px] text-sm leading-6 text-black/50 dark:text-white/48">
-                See what&apos;s happening now, what&apos;s on this week and what&apos;s coming next.
+                Posters first, then the details you need: time, venue and organiser.
               </p>
               <a
                 href="#upcoming"
@@ -224,7 +225,7 @@ export default function DiscoverPage() {
                     }
                     description={
                       eventGroups.happeningNow.length
-                        ? "Open an event to see the time, venue and organiser."
+                        ? "See the poster, time, venue and organiser below."
                         : "Check back soon for events happening around campus."
                     }
                     icon={<Clock3 size={20} />}
@@ -261,7 +262,7 @@ export default function DiscoverPage() {
                   </div>
 
                   {eventGroups.upcoming.length > 0 ? (
-                    <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-2">
                       {eventGroups.upcoming.map((event) => (
                         <EventCard key={event.id} event={event} />
                       ))}
@@ -363,7 +364,7 @@ function EventList({ title, events }: { title: string; events: EventRecord[] }) 
   return (
     <section className="mt-7">
       <h2 className="text-xl font-black tracking-[-0.035em]">{title}</h2>
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
         {events.map((event) => (
           <EventCard key={event.id} event={event} />
         ))}
@@ -390,53 +391,79 @@ function EventCard({ event }: { event: EventRecord }) {
     : null;
 
   return (
-    <article className="rounded-[26px] border border-white/55 bg-white/36 p-5 shadow-[0_16px_48px_rgba(16,46,28,0.07)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.04]">
-      <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#397151] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]">
-          {event.event_type}
-        </span>
-        {event.is_featured && (
-          <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#8a6d20] dark:text-[#e0c563]">Featured</span>
-        )}
-      </div>
-
-      <h3 className="mt-4 text-xl font-black tracking-[-0.035em]">{event.title}</h3>
-      {event.description && (
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-black/45 dark:text-white/40">{event.description}</p>
+    <article className="overflow-hidden rounded-[28px] border border-white/55 bg-white/38 shadow-[0_18px_54px_rgba(16,46,28,0.09)] backdrop-blur-3xl dark:border-white/[0.08] dark:bg-white/[0.045]">
+      {event.image_url ? (
+        <div className="relative overflow-hidden border-b border-white/45 bg-black/[0.04] dark:border-white/[0.06] dark:bg-black/20">
+          <div
+            className="absolute inset-0 scale-110 bg-cover bg-center opacity-20 blur-2xl"
+            style={{ backgroundImage: `url(${event.image_url})` }}
+            aria-hidden="true"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={event.image_url}
+            alt={`${event.title} event poster`}
+            loading="lazy"
+            className="relative mx-auto aspect-[4/5] max-h-[520px] w-full object-contain"
+          />
+        </div>
+      ) : (
+        <div className="flex min-h-[150px] items-center justify-center border-b border-white/45 bg-[radial-gradient(circle_at_20%_20%,rgba(140,230,173,0.18),transparent_42%),linear-gradient(145deg,rgba(255,255,255,0.35),rgba(255,255,255,0.12))] dark:border-white/[0.06] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(140,230,173,0.10),transparent_42%),linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))]">
+          <div className="text-center">
+            <CalendarDays size={24} className="mx-auto text-[#397151]/55 dark:text-[#8ce6ad]/60" />
+            <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-black/28 dark:text-white/28">Campus event</p>
+          </div>
+        </div>
       )}
 
-      <div className="mt-5 space-y-2 text-xs font-semibold text-black/48 dark:text-white/42">
-        <div className="flex items-center gap-2">
-          <CalendarDays size={14} className="text-[#397151] dark:text-[#8ce6ad]" />
-          <span>{date}</span>
+      <div className="p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#397151] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-[#8ce6ad]">
+            {event.event_type}
+          </span>
+          {event.is_featured && (
+            <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#8a6d20] dark:text-[#e0c563]">Featured</span>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <Clock3 size={14} className="text-[#397151] dark:text-[#8ce6ad]" />
-          <span>{startTime}{endTime ? ` – ${endTime}` : ""}</span>
-        </div>
-        {event.venue_name && (
-          <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-[#397151] dark:text-[#8ce6ad]" />
-            <span>{event.venue_name}</span>
-          </div>
-        )}
-      </div>
 
-      <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/55 pt-4 dark:border-white/[0.06]">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.1em] text-black/30 dark:text-white/28">Organiser</p>
-          <p className="mt-1 text-xs font-bold">{event.organizer_name}</p>
-        </div>
-        {event.official_url && (
-          <a
-            href={event.official_url}
-            target="_blank"
-            rel="noreferrer"
-            className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/48 px-3 text-xs font-extrabold text-[#214f34] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
-          >
-            More info <ExternalLink size={13} />
-          </a>
+        <h3 className="mt-4 text-xl font-black tracking-[-0.035em]">{event.title}</h3>
+        {event.description && (
+          <p className="mt-2 line-clamp-3 text-sm leading-6 text-black/45 dark:text-white/40">{event.description}</p>
         )}
+
+        <div className="mt-5 space-y-2 text-xs font-semibold text-black/48 dark:text-white/42">
+          <div className="flex items-center gap-2">
+            <CalendarDays size={14} className="text-[#397151] dark:text-[#8ce6ad]" />
+            <span>{date}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock3 size={14} className="text-[#397151] dark:text-[#8ce6ad]" />
+            <span>{startTime}{endTime ? ` – ${endTime}` : ""}</span>
+          </div>
+          {event.venue_name && (
+            <div className="flex items-center gap-2">
+              <MapPin size={14} className="text-[#397151] dark:text-[#8ce6ad]" />
+              <span>{event.venue_name}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/55 pt-4 dark:border-white/[0.06]">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.1em] text-black/30 dark:text-white/28">Organiser</p>
+            <p className="mt-1 text-xs font-bold">{event.organizer_name}</p>
+          </div>
+          {event.official_url && (
+            <a
+              href={event.official_url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex min-h-10 items-center gap-2 rounded-[14px] border border-white/60 bg-white/48 px-3 text-xs font-extrabold text-[#214f34] shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white"
+            >
+              More info <ExternalLink size={13} />
+            </a>
+          )}
+        </div>
       </div>
     </article>
   );
