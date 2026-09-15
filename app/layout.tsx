@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import AppAccessGate from "@/components/AppAccessGate";
 import AppBottomNavigation from "@/components/AppBottomNavigation";
 import AdminAccessChip from "@/components/AdminAccessChip";
+import BrandingSync from "@/components/BrandingSync";
 import "./globals.css";
 import "./futago-motion.css";
 import "./futago-campus.css";
@@ -18,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FUTAGO",
-  description: "Know where to go around FUTA.",
+  title: "DoniVerse",
+  description: "Your whole campus world, in one place.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <BrandingSync />
         <AppAccessGate>
           {children}
           <AdminAccessChip />
