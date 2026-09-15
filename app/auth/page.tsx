@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
+  CheckCircle2,
   Eye,
   EyeOff,
   GraduationCap,
   Loader2,
   LockKeyhole,
   Mail,
+  RefreshCcw,
   UserRound,
 } from "lucide-react";
 
@@ -18,11 +20,16 @@ import { FUTAGO_GUEST_KEY } from "@/components/AppAccessGate";
 import { supabase } from "@/lib/supabase/client";
 
 type AuthMode = "signup" | "signin";
-type ViewMode = "auth" | "forgot";
+type ViewMode = "auth" | "forgot" | "confirm";
 
 const FUTA_CAMPUS_IMAGE =
   "https://upload.wikimedia.org/wikipedia/commons/2/29/Federal_University_of_Technology%2C_Akure%2C_Ondo_State11.jpg";
 const FUTA_CAMPUS_VIDEO = "/futago-auth-campus.mp4";
+const RESEND_COOLDOWN_SECONDS = 60;
+
+function confirmationRedirectUrl() {
+  return `${window.location.origin}/auth/callback?next=/onboarding`;
+}
 
 export default function AuthPage() {
   const router = useRouter();
@@ -31,12 +38,14 @@ export default function AuthPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("auth");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [videoReady, setVideoReady] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -54,6 +63,14 @@ export default function AuthPage() {
 
     return () => video.removeEventListener("canplay", tryPlay);
   }, []);
+
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendSeconds((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendSeconds]);
 
   const resetFeedback = () => {
     setMessage("");
@@ -78,7 +95,7 @@ export default function AuthPage() {
   const handleBack = () => {
     if (loading) return;
 
-    if (viewMode === "forgot") {
+    if (viewMode === "forgot" || viewMode === "confirm") {
       setViewMode("auth");
       setMode("signin");
       resetFeedback();
@@ -133,7 +150,7 @@ export default function AuthPage() {
           password,
           options: {
             data: { full_name: cleanedFullName },
-            emailRedirectTo: `${window.location.origin}/onboarding`,
+            emailRedirectTo: confirmationRedirectUrl(),
           },
         });
 
@@ -144,8 +161,10 @@ export default function AuthPage() {
           return;
         }
 
-        setMessage("Account created. Check your email to confirm your account, then sign in.");
-        setMode("signin");
+        setConfirmEmail(cleanedEmail);
+        setViewMode("confirm");
+        setResendSeconds(RESEND_COOLDOWN_SECONDS);
+        setMessage("Confirmation email sent.");
         setPassword("");
         setShowPassword(false);
         return;
@@ -167,6 +186,30 @@ export default function AuthPage() {
     }
   };
 
+  const handleResendConfirmation = async () => {
+    if (loading || resendSeconds > 0 || !confirmEmail) return;
+
+    resetFeedback();
+    try {
+      setLoading(true);
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email: confirmEmail,
+        options: {
+          emailRedirectTo: confirmationRedirectUrl(),
+        },
+      });
+
+      if (resendError) throw resendError;
+      setMessage("A new confirmation email has been sent.");
+      setResendSeconds(RESEND_COOLDOWN_SECONDS);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "We could not resend the confirmation email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePasswordReset = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (loading) return;
@@ -175,7 +218,7 @@ export default function AuthPage() {
     const cleanedEmail = email.trim().toLowerCase();
 
     if (!cleanedEmail) {
-      setError("Enter the email connected to your FUTAGO account.");
+      setError("Enter the email connected to your account.");
       return;
     }
 
@@ -249,11 +292,11 @@ export default function AuthPage() {
                 <span className="block text-[#a0efbb]">FUTAGO.</span>
               </h1>
               <p className="mt-5 max-w-md text-sm leading-6 text-white/62 sm:text-[15px]">
-                Find your way around FUTA, follow your student journey and stay connected to campus life.
+                Find your way around campus, follow your student journey and stay connected to campus life.
               </p>
             </div>
 
-            <p className="hidden text-xs text-white/35 lg:block">Federal University of Technology, Akure</p>
+            <p className="hidden text-xs text-white/35 lg:block">Your campus companion</p>
           </section>
 
           <section className="flex flex-1 items-end pb-2 lg:items-center lg:py-12">
@@ -289,6 +332,22 @@ export default function AuthPage() {
                   onSubmit={handlePasswordReset}
                   onBack={() => {
                     if (loading) return;
+                    setViewMode("auth");
+                    setMode("signin");
+                    resetFeedback();
+                  }}
+                />
+              ) : viewMode === "confirm" ? (
+                <ConfirmEmailView
+                  email={confirmEmail}
+                  loading={loading}
+                  error={error}
+                  message={message}
+                  resendSeconds={resendSeconds}
+                  onResend={handleResendConfirmation}
+                  onSignIn={() => {
+                    if (loading) return;
+                    setEmail(confirmEmail);
                     setViewMode("auth");
                     setMode("signin");
                     resetFeedback();
@@ -479,6 +538,68 @@ function AuthView({
   );
 }
 
+function ConfirmEmailView({
+  email,
+  loading,
+  error,
+  message,
+  resendSeconds,
+  onResend,
+  onSignIn,
+}: {
+  email: string;
+  loading: boolean;
+  error: string;
+  message: string;
+  resendSeconds: number;
+  onResend: () => Promise<void>;
+  onSignIn: () => void;
+}) {
+  return (
+    <>
+      <div className="flex h-12 w-12 items-center justify-center rounded-[16px] border border-[#a0efbb]/20 bg-[#a0efbb]/10 text-[#a0efbb]">
+        <CheckCircle2 size={24} />
+      </div>
+      <p className="mt-5 text-xs font-bold uppercase tracking-[0.15em] text-[#a0efbb]">Confirm your email</p>
+      <h2 className="mt-2 text-[30px] font-black tracking-[-0.05em] sm:text-[36px]">Check your inbox.</h2>
+      <p className="mt-3 max-w-md text-sm leading-6 text-white/55">
+        We sent a confirmation link to <span className="font-bold text-white/85">{email}</span>. Open the newest email and tap the confirmation link.
+      </p>
+      <p className="mt-2 text-xs leading-5 text-white/38">
+        Delivery can sometimes take a minute. If it does not arrive, use resend below instead of creating another account.
+      </p>
+
+      <div className="mt-6 space-y-3">
+        {error && <FeedbackBox text={error} error />}
+        {message && <FeedbackBox text={message} />}
+
+        <button
+          type="button"
+          disabled={loading || resendSeconds > 0}
+          onClick={() => void onResend()}
+          className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-[18px] border border-white/12 bg-white/[0.07] px-5 text-sm font-extrabold text-white transition disabled:opacity-45"
+        >
+          {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCcw size={17} />}
+          {loading
+            ? "Sending..."
+            : resendSeconds > 0
+              ? `Resend available in ${resendSeconds}s`
+              : "Resend confirmation email"}
+        </button>
+
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onSignIn}
+          className="min-h-11 w-full text-sm font-bold text-[#a0efbb] disabled:opacity-50"
+        >
+          Already confirmed? Sign in
+        </button>
+      </div>
+    </>
+  );
+}
+
 function ForgotPasswordView({
   email,
   setEmail,
@@ -500,7 +621,7 @@ function ForgotPasswordView({
     <>
       <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#a0efbb]">Account recovery</p>
       <h2 className="mt-2 text-[30px] font-black tracking-[-0.05em] sm:text-[36px]">Reset your password.</h2>
-      <p className="mt-2 max-w-md text-sm leading-6 text-white/50">Enter the email connected to your FUTAGO account.</p>
+      <p className="mt-2 max-w-md text-sm leading-6 text-white/50">Enter the email connected to your account.</p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <GlassField label="Email" icon={<Mail size={18} />}>
