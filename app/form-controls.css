@@ -1,0 +1,46 @@
+/* DoniVerse shared form-control fixes */
+
+select {
+  color-scheme: light;
+}
+
+select option {
+  background: #ffffff;
+  color: #102017;
+}
+
+@media (prefers-color-scheme: dark) {
+  select {
+    color-scheme: dark;
+  }
+
+  select option {
+    background: #101914;
+    color: #ffffff;
+  }
+}
+
+.dark select {
+  color-scheme: dark;
+}
+
+.dark select option {
+  background: #101914;
+  color: #ffffff;
+}
+
+.venue-picker-root {
+  position: relative;
+  z-index: 80;
+}
+
+form > section:has(.venue-picker-root) {
+  position: relative;
+  z-index: 70;
+  overflow: visible;
+}
+
+form > section:has(.venue-picker-root) + section {
+  position: relative;
+  z-index: 10;
+}
