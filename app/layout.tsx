@@ -4,6 +4,7 @@ import AppAccessGate from "@/components/AppAccessGate";
 import AppBottomNavigation from "@/components/AppBottomNavigation";
 import AdminAccessChip from "@/components/AdminAccessChip";
 import LegacyBrandBridge from "@/components/LegacyBrandBridge";
+import PlaceSuggestionEntryPoints from "@/components/PlaceSuggestionEntryPoints";
 import "./globals.css";
 import "./form-controls.css";
 import "./doniverse-motion.css";
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <LegacyBrandBridge />
         <AppAccessGate>
           {children}
+          <PlaceSuggestionEntryPoints />
           <AdminAccessChip />
           <AppBottomNavigation />
         </AppAccessGate>
