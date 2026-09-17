@@ -9,7 +9,6 @@ type WebhookPayload = {
 };
 
 type Recipient = {
-  id: string;
   email: string;
   name: string;
 };
@@ -59,14 +58,14 @@ function formatEventDate(startValue: unknown, endValue: unknown) {
 }
 
 function chunk<T>(items: T[], size: number) {
-  const chunks: T[][] = [];
+  const result: T[][] = [];
   for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size));
+    result.push(items.slice(index, index + size));
   }
-  return chunks;
+  return result;
 }
 
-function eventEmail(record: Record<string, unknown>, appUrl: string) {
+function buildEventEmail(record: Record<string, unknown>, appUrl: string) {
   const id = String(record.id);
   const title = String(record.title ?? "Campus event");
   const description = truncate(record.description);
@@ -77,41 +76,34 @@ function eventEmail(record: Record<string, unknown>, appUrl: string) {
   const calendarUrl = `${appUrl}/api/calendar/event/${id}`;
   const when = formatEventDate(record.starts_at, record.ends_at);
 
-  const html = `<!doctype html>
-<html>
-  <body style="margin:0;background:#eef4ef;font-family:Arial,sans-serif;color:#102017">
-    <div style="max-width:620px;margin:0 auto;padding:28px 16px">
-      <div style="background:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #dce9df">
-        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-height:390px;object-fit:cover">` : ""}
-        <div style="padding:28px">
-          <div style="font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#397151">New on DoniVerse</div>
-          <h1 style="margin:10px 0 0;font-size:28px;line-height:1.08">${escapeHtml(title)}</h1>
-          <p style="margin:14px 0 0;color:#506057;line-height:1.65">Hi {{params.firstName}}, a newly approved campus event is now live on DoniVerse.</p>
-          ${description ? `<p style="margin:16px 0 0;color:#506057;line-height:1.65">${escapeHtml(description)}</p>` : ""}
-          <div style="margin-top:20px;padding:18px;border-radius:16px;background:#f3f8f4">
-            <div style="font-weight:800">${escapeHtml(when)}</div>
-            ${venue ? `<div style="margin-top:7px;color:#506057">📍 ${escapeHtml(venue)}</div>` : ""}
-            ${organiser ? `<div style="margin-top:7px;color:#506057">Hosted by ${escapeHtml(organiser)}</div>` : ""}
-          </div>
-          <div style="margin-top:22px">
-            <a href="${eventUrl}" style="display:inline-block;margin:0 8px 10px 0;padding:13px 18px;border-radius:14px;background:#174d31;color:#fff;text-decoration:none;font-weight:800">Check out the event</a>
-            <a href="${calendarUrl}" style="display:inline-block;margin:0 0 10px;padding:13px 18px;border-radius:14px;background:#dff3e5;color:#174d31;text-decoration:none;font-weight:800">Add to calendar</a>
-          </div>
-          <p style="margin:18px 0 0;font-size:12px;color:#7b877f;line-height:1.6">DoniVerse · Your whole campus world, in one place.</p>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>`;
-
   return {
-    subject: `New event on DoniVerse: ${title}`,
-    html,
     title,
+    subject: `New event on DoniVerse: ${title}`,
+    html: `<!doctype html>
+<html><body style="margin:0;background:#eef4ef;font-family:Arial,sans-serif;color:#102017">
+<div style="max-width:620px;margin:0 auto;padding:28px 16px">
+<div style="background:#fff;border-radius:24px;overflow:hidden;border:1px solid #dce9df">
+${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-height:390px;object-fit:cover">` : ""}
+<div style="padding:28px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#397151">New on DoniVerse</div>
+<h1 style="margin:10px 0 0;font-size:28px;line-height:1.08">${escapeHtml(title)}</h1>
+<p style="margin:14px 0 0;color:#506057;line-height:1.65">Hi {{params.firstName}}, a newly approved campus event is now live on DoniVerse.</p>
+${description ? `<p style="margin:16px 0 0;color:#506057;line-height:1.65">${escapeHtml(description)}</p>` : ""}
+<div style="margin-top:20px;padding:18px;border-radius:16px;background:#f3f8f4">
+<div style="font-weight:800">${escapeHtml(when)}</div>
+${venue ? `<div style="margin-top:7px;color:#506057">📍 ${escapeHtml(venue)}</div>` : ""}
+${organiser ? `<div style="margin-top:7px;color:#506057">Hosted by ${escapeHtml(organiser)}</div>` : ""}
+</div>
+<div style="margin-top:22px">
+<a href="${eventUrl}" style="display:inline-block;margin:0 8px 10px 0;padding:13px 18px;border-radius:14px;background:#174d31;color:#fff;text-decoration:none;font-weight:800">Check out the event</a>
+<a href="${calendarUrl}" style="display:inline-block;margin:0 0 10px;padding:13px 18px;border-radius:14px;background:#dff3e5;color:#174d31;text-decoration:none;font-weight:800">Add to calendar</a>
+</div>
+<p style="margin:18px 0 0;font-size:12px;color:#7b877f;line-height:1.6">DoniVerse · Your whole campus world, in one place.</p>
+</div></div></div></body></html>`,
   };
 }
 
-function communityEmail(record: Record<string, unknown>, appUrl: string) {
+function buildCommunityEmail(record: Record<string, unknown>, appUrl: string) {
   const id = String(record.id);
   const name = String(record.name ?? "Campus community");
   const description = truncate(record.description);
@@ -120,32 +112,23 @@ function communityEmail(record: Record<string, unknown>, appUrl: string) {
   const imageUrl = String(record.image_url ?? "").trim();
   const communityUrl = `${appUrl}/discover/community/${id}`;
 
-  const html = `<!doctype html>
-<html>
-  <body style="margin:0;background:#eef4ef;font-family:Arial,sans-serif;color:#102017">
-    <div style="max-width:620px;margin:0 auto;padding:28px 16px">
-      <div style="background:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #dce9df">
-        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" style="display:block;width:100%;max-height:390px;object-fit:cover">` : ""}
-        <div style="padding:28px">
-          <div style="font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#397151">New DoniVerse Community</div>
-          <h1 style="margin:10px 0 0;font-size:28px;line-height:1.08">${escapeHtml(name)}</h1>
-          <p style="margin:14px 0 0;color:#506057;line-height:1.65">Hi {{params.firstName}}, check out this newly approved ${escapeHtml(category)} community on DoniVerse.</p>
-          ${description ? `<p style="margin:16px 0 0;color:#506057;line-height:1.65">${escapeHtml(description)}</p>` : ""}
-          ${location ? `<div style="margin-top:20px;padding:18px;border-radius:16px;background:#f3f8f4;font-weight:700">📍 ${escapeHtml(location)}</div>` : ""}
-          <div style="margin-top:22px">
-            <a href="${communityUrl}" style="display:inline-block;padding:13px 18px;border-radius:14px;background:#174d31;color:#fff;text-decoration:none;font-weight:800">Check out this community</a>
-          </div>
-          <p style="margin:18px 0 0;font-size:12px;color:#7b877f;line-height:1.6">DoniVerse · Your whole campus world, in one place.</p>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>`;
-
   return {
-    subject: `New community on DoniVerse: ${name}`,
-    html,
     title: name,
+    subject: `New community on DoniVerse: ${name}`,
+    html: `<!doctype html>
+<html><body style="margin:0;background:#eef4ef;font-family:Arial,sans-serif;color:#102017">
+<div style="max-width:620px;margin:0 auto;padding:28px 16px">
+<div style="background:#fff;border-radius:24px;overflow:hidden;border:1px solid #dce9df">
+${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(name)}" style="display:block;width:100%;max-height:390px;object-fit:cover">` : ""}
+<div style="padding:28px">
+<div style="font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#397151">New DoniVerse Community</div>
+<h1 style="margin:10px 0 0;font-size:28px;line-height:1.08">${escapeHtml(name)}</h1>
+<p style="margin:14px 0 0;color:#506057;line-height:1.65">Hi {{params.firstName}}, check out this newly approved ${escapeHtml(category)} community on DoniVerse.</p>
+${description ? `<p style="margin:16px 0 0;color:#506057;line-height:1.65">${escapeHtml(description)}</p>` : ""}
+${location ? `<div style="margin-top:20px;padding:18px;border-radius:16px;background:#f3f8f4;font-weight:700">📍 ${escapeHtml(location)}</div>` : ""}
+<div style="margin-top:22px"><a href="${communityUrl}" style="display:inline-block;padding:13px 18px;border-radius:14px;background:#174d31;color:#fff;text-decoration:none;font-weight:800">Check out this community</a></div>
+<p style="margin:18px 0 0;font-size:12px;color:#7b877f;line-height:1.6">DoniVerse · Your whole campus world, in one place.</p>
+</div></div></div></body></html>`,
   };
 }
 
@@ -162,11 +145,9 @@ async function listRecipients(supabaseAdmin: ReturnType<typeof createClient>) {
 
     for (const user of data.users) {
       if (!user.email || !user.email_confirmed_at) continue;
-      const fullName = String(user.user_metadata?.full_name ?? "").trim();
       recipients.push({
-        id: user.id,
         email: user.email,
-        name: fullName,
+        name: String(user.user_metadata?.full_name ?? "").trim(),
       });
     }
 
@@ -237,10 +218,12 @@ Deno.serve(async (request) => {
   const appUrl = (Deno.env.get("DONIVERSE_APP_URL") || "").replace(/\/$/, "");
 
   if (!supabaseUrl || !serviceRoleKey || !brevoApiKey || !senderEmail || !appUrl) {
-    return Response.json(
-      { error: "Missing notification environment variables" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Missing notification environment variables" }, { status: 500 });
+  }
+
+  const authorization = request.headers.get("authorization");
+  if (authorization !== `Bearer ${serviceRoleKey}`) {
+    return Response.json({ error: "Unauthorized webhook" }, { status: 401 });
   }
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
@@ -254,20 +237,34 @@ Deno.serve(async (request) => {
     return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
   }
 
-  const record = payload.record;
-  const oldRecord = payload.old_record;
-
-  if (!record || !["events", "communities"].includes(payload.table)) {
+  if (!payload.record || !["events", "communities"].includes(payload.table)) {
     return Response.json({ skipped: true, reason: "Unsupported webhook" });
   }
 
-  if (record.status !== "approved" || oldRecord?.status === "approved") {
+  if (payload.record.status !== "approved" || payload.old_record?.status === "approved") {
     return Response.json({ skipped: true, reason: "Not a new approval" });
   }
 
+  const contentId = String(payload.record.id ?? "");
+  if (!contentId) {
+    return Response.json({ error: "Missing content id" }, { status: 400 });
+  }
+
+  const { data: currentRecord, error: currentError } = await supabaseAdmin
+    .from(payload.table)
+    .select("*")
+    .eq("id", contentId)
+    .eq("status", "approved")
+    .maybeSingle();
+
+  if (currentError || !currentRecord) {
+    return Response.json({ skipped: true, reason: "Approved record not found" });
+  }
+
   const contentKind = payload.table === "events" ? "event" : "community";
-  const contentId = String(record.id);
-  const email = contentKind === "event" ? eventEmail(record, appUrl) : communityEmail(record, appUrl);
+  const email = contentKind === "event"
+    ? buildEventEmail(currentRecord, appUrl)
+    : buildCommunityEmail(currentRecord, appUrl);
 
   const { data: broadcast, error: claimError } = await supabaseAdmin
     .from("notification_broadcasts")
@@ -300,6 +297,7 @@ Deno.serve(async (request) => {
 
     const batches = chunk(recipients, MAX_BATCH_SIZE);
     const batchKeys = batches.map(() => crypto.randomUUID());
+
     await supabaseAdmin
       .from("notification_broadcasts")
       .update({ batch_keys: batchKeys })
