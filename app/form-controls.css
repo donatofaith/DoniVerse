@@ -1,7 +1,8 @@
 /* DoniVerse shared form controls
    Keep every editable field visually obvious in both light and dark modes. */
 
-.input-shell {
+.input-shell,
+.field-input {
   display: block;
   width: 100%;
   min-height: 56px;
@@ -26,13 +27,16 @@
     transform 160ms ease;
 }
 
-.input-shell:hover {
+.input-shell:hover,
+.field-input:hover {
   border-color: rgba(39, 111, 69, 0.52) !important;
   background: #ffffff !important;
 }
 
 .input-shell:focus,
-.input-shell:focus-visible {
+.input-shell:focus-visible,
+.field-input:focus,
+.field-input:focus-visible {
   border-color: rgba(52, 126, 79, 0.9) !important;
   background: #ffffff !important;
   box-shadow:
@@ -40,20 +44,23 @@
     0 12px 30px rgba(16, 46, 28, 0.11) !important;
 }
 
-.input-shell::placeholder {
+.input-shell::placeholder,
+.field-input::placeholder {
   color: rgba(16, 32, 23, 0.48) !important;
   opacity: 1;
   font-weight: 550;
 }
 
-textarea.input-shell {
+textarea.input-shell,
+textarea.field-input {
   min-height: 144px;
   padding-top: 14px;
   padding-bottom: 14px;
   resize: vertical;
 }
 
-select.input-shell {
+select.input-shell,
+select.field-input {
   cursor: pointer;
   padding-right: 44px;
   color-scheme: light;
@@ -70,14 +77,18 @@ select option {
 
 input.input-shell:-webkit-autofill,
 input.input-shell:-webkit-autofill:hover,
-input.input-shell:-webkit-autofill:focus {
+input.input-shell:-webkit-autofill:focus,
+input.field-input:-webkit-autofill,
+input.field-input:-webkit-autofill:hover,
+input.field-input:-webkit-autofill:focus {
   -webkit-text-fill-color: #102017;
   box-shadow: 0 0 0 1000px #ffffff inset !important;
   transition: background-color 9999s ease-out 0s;
 }
 
 @media (prefers-color-scheme: dark) {
-  .input-shell {
+  .input-shell,
+  .field-input {
     border-color: rgba(155, 237, 183, 0.34) !important;
     background: rgba(7, 18, 12, 0.96) !important;
     color: #f5fbf7 !important;
@@ -86,13 +97,16 @@ input.input-shell:-webkit-autofill:focus {
       0 10px 28px rgba(0, 0, 0, 0.24) !important;
   }
 
-  .input-shell:hover {
+  .input-shell:hover,
+  .field-input:hover {
     border-color: rgba(155, 237, 183, 0.5) !important;
     background: rgba(10, 25, 16, 0.99) !important;
   }
 
   .input-shell:focus,
-  .input-shell:focus-visible {
+  .input-shell:focus-visible,
+  .field-input:focus,
+  .field-input:focus-visible {
     border-color: rgba(155, 237, 183, 0.88) !important;
     background: rgba(10, 25, 16, 1) !important;
     box-shadow:
@@ -100,7 +114,8 @@ input.input-shell:-webkit-autofill:focus {
       0 13px 32px rgba(0, 0, 0, 0.28) !important;
   }
 
-  .input-shell::placeholder {
+  .input-shell::placeholder,
+  .field-input::placeholder {
     color: rgba(255, 255, 255, 0.48) !important;
   }
 
@@ -115,19 +130,26 @@ input.input-shell:-webkit-autofill:focus {
 
   input.input-shell:-webkit-autofill,
   input.input-shell:-webkit-autofill:hover,
-  input.input-shell:-webkit-autofill:focus {
+  input.input-shell:-webkit-autofill:focus,
+  input.field-input:-webkit-autofill,
+  input.field-input:-webkit-autofill:hover,
+  input.field-input:-webkit-autofill:focus {
     -webkit-text-fill-color: #f5fbf7;
     box-shadow: 0 0 0 1000px #0a1910 inset !important;
   }
 
   input.input-shell[type="datetime-local"]::-webkit-calendar-picker-indicator,
   input.input-shell[type="date"]::-webkit-calendar-picker-indicator,
-  input.input-shell[type="time"]::-webkit-calendar-picker-indicator {
+  input.input-shell[type="time"]::-webkit-calendar-picker-indicator,
+  input.field-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  input.field-input[type="date"]::-webkit-calendar-picker-indicator,
+  input.field-input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1) opacity(0.82);
   }
 }
 
-.dark .input-shell {
+.dark .input-shell,
+.dark .field-input {
   border-color: rgba(155, 237, 183, 0.34) !important;
   background: rgba(7, 18, 12, 0.96) !important;
   color: #f5fbf7 !important;
@@ -136,19 +158,23 @@ input.input-shell:-webkit-autofill:focus {
     0 10px 28px rgba(0, 0, 0, 0.24) !important;
 }
 
-.dark .input-shell:hover {
+.dark .input-shell:hover,
+.dark .field-input:hover {
   border-color: rgba(155, 237, 183, 0.5) !important;
   background: rgba(10, 25, 16, 0.99) !important;
 }
 
 .dark .input-shell:focus,
-.dark .input-shell:focus-visible {
+.dark .input-shell:focus-visible,
+.dark .field-input:focus,
+.dark .field-input:focus-visible {
   border-color: rgba(155, 237, 183, 0.88) !important;
   background: rgba(10, 25, 16, 1) !important;
   box-shadow: 0 0 0 4px rgba(155, 237, 183, 0.13) !important;
 }
 
-.dark .input-shell::placeholder {
+.dark .input-shell::placeholder,
+.dark .field-input::placeholder {
   color: rgba(255, 255, 255, 0.48) !important;
 }
 
@@ -163,7 +189,10 @@ input.input-shell:-webkit-autofill:focus {
 
 .dark input.input-shell[type="datetime-local"]::-webkit-calendar-picker-indicator,
 .dark input.input-shell[type="date"]::-webkit-calendar-picker-indicator,
-.dark input.input-shell[type="time"]::-webkit-calendar-picker-indicator {
+.dark input.input-shell[type="time"]::-webkit-calendar-picker-indicator,
+.dark input.field-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.dark input.field-input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input.field-input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1) opacity(0.82);
 }
 
@@ -185,13 +214,15 @@ form > section:has(.venue-picker-root) + section {
 }
 
 @media (max-width: 640px) {
-  .input-shell {
+  .input-shell,
+  .field-input {
     min-height: 58px;
     border-radius: 18px;
     font-size: 16px;
   }
 
-  textarea.input-shell {
+  textarea.input-shell,
+  textarea.field-input {
     min-height: 150px;
   }
 }
