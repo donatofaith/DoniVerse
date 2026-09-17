@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
 
@@ -34,11 +34,9 @@ export default function PlacePinPicker({ latitude, longitude, onChange }: PlaceP
   return (
     <div className="h-[300px] w-full overflow-hidden rounded-[22px] border border-white/60 shadow-inner dark:border-white/10">
       <MapContainer center={position} zoom={16} scrollWheelZoom className="h-full w-full" zoomControl={false}>
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <MapClickHandler onChange={onChange} />
+        <MapRecenter position={position} />
         <Marker
           position={position}
           icon={icon}
@@ -57,8 +55,12 @@ export default function PlacePinPicker({ latitude, longitude, onChange }: PlaceP
 }
 
 function MapClickHandler({ onChange }: { onChange: (latitude: number, longitude: number) => void }) {
-  useMapEvents({
-    click: (event) => onChange(event.latlng.lat, event.latlng.lng),
-  });
+  useMapEvents({ click: (event) => onChange(event.latlng.lat, event.latlng.lng) });
+  return null;
+}
+
+function MapRecenter({ position }: { position: [number, number] }) {
+  const map = useMap();
+  useEffect(() => { map.setView(position, Math.max(map.getZoom(), 16), { animate: true }); }, [map, position]);
   return null;
 }
