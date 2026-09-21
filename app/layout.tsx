@@ -26,6 +26,22 @@ export const metadata: Metadata = {
   description: "Your whole campus world, in one place.",
   applicationName: "DoniVerse",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      {
+        url: "/icon?v=2",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/apple-icon?v=2",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
