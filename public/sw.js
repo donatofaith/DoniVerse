@@ -1,12 +1,12 @@
-const CACHE_NAME = "doniverse-shell-v1";
+const CACHE_NAME = "doniverse-shell-v2";
 const OFFLINE_URL = "/offline";
 
 const APP_SHELL = [
   OFFLINE_URL,
   "/manifest.webmanifest",
-  "/icon",
-  "/icon-192",
-  "/apple-icon",
+  "/icon?v=2",
+  "/icon-192?v=2",
+  "/apple-icon?v=2",
 ];
 
 self.addEventListener("install", (event) => {
