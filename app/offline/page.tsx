@@ -26,12 +26,6 @@ export default function OfflinePage() {
         </p>
 
         <div className="mt-6 grid gap-3">
-          <button
-            type="button"
-            onClick={undefined}
-            className="hidden"
-            aria-hidden="true"
-          />
           <Link
             href="/"
             className="flex min-h-12 items-center justify-center gap-2 rounded-[16px] bg-[#174d31] px-5 text-sm font-black text-white"
