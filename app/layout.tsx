@@ -5,6 +5,7 @@ import AppBottomNavigation from "@/components/AppBottomNavigation";
 import AdminAccessChip from "@/components/AdminAccessChip";
 import LegacyBrandBridge from "@/components/LegacyBrandBridge";
 import PlaceSuggestionEntryPoints from "@/components/PlaceSuggestionEntryPoints";
+import PWAServiceWorker from "@/components/PWAServiceWorker";
 import "./globals.css";
 import "./form-controls.css";
 import "./doniverse-motion.css";
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <PWAServiceWorker />
         <LegacyBrandBridge />
         <AppAccessGate>
           {children}
