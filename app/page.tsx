@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { FUTAGO_GUEST_KEY } from "@/components/AppAccessGate";\nimport PWAInstallCard from "@/components/PWAInstallCard";
+import { FUTAGO_GUEST_KEY } from "@/components/AppAccessGate";
+import PWAInstallCard from "@/components/PWAInstallCard";
 import { supabase } from "@/lib/supabase/client";
 
 const FUTA_CAMPUS_IMAGE =
