@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { FUTAGO_GUEST_KEY } from "@/components/AppAccessGate";
+import { FUTAGO_GUEST_KEY } from "@/components/AppAccessGate";\nimport PWAInstallCard from "@/components/PWAInstallCard";
 import { supabase } from "@/lib/supabase/client";
 
 const FUTA_CAMPUS_IMAGE =
@@ -439,7 +439,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="relative z-10 mt-9">
+        <PWAInstallCard />\n\n        <section className="relative z-10 mt-9">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#47795a] dark:text-[#a9efc1]">Around campus</p>
