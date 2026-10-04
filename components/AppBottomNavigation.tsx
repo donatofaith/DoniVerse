@@ -1,24 +1,25 @@
 "use client";
 
 import {
-  BookOpenCheck,
   Compass,
   HeartHandshake,
   Home,
   Sparkles,
+  UserRound,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
   { label: "Home", icon: Home, href: "/" },
   { label: "Explore", icon: Compass, href: "/explore" },
-  { label: "Journey", icon: BookOpenCheck, href: "/journey" },
+  { label: "My Campus", icon: UserRound, href: "/my-campus" },
   { label: "Discover", icon: Sparkles, href: "/discover" },
   { label: "Help", icon: HeartHandshake, href: "/help" },
 ];
 
 const supportedPaths = new Set([
   "/explore",
+  "/my-campus",
   "/journey",
   "/discover",
   "/help",
@@ -38,7 +39,7 @@ export default function AppBottomNavigation() {
         <nav className="relative flex h-[72px] items-center justify-around overflow-hidden rounded-[25px] border border-white/70 bg-white/48 px-2 shadow-[0_20px_60px_rgba(16,42,27,0.18)] backdrop-blur-3xl dark:border-white/12 dark:bg-[#0b1410]/72 dark:shadow-[0_20px_60px_rgba(0,0,0,0.32)]">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.href;
+            const active = pathname === item.href || (item.href === "/my-campus" && pathname === "/journey");
 
             return (
               <button
