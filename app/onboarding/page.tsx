@@ -169,9 +169,9 @@ export default function OnboardingPage() {
 
     const cleanedName = fullName.trim();
     const cleanedMatric = matricNumber.trim().toUpperCase();
+    const resolvedStatus: StudentStatus = level === "100" ? "fresher" : studentStatus;
 
     if (!cleanedName) return setError("Enter your full name.");
-    if (!cleanedMatric) return setError("Enter your matric number.");
     if (!schoolId) return setError("Choose your school.");
     if (!departmentId) return setError("Choose your department.");
     if (!level) return setError("Choose your level.");
@@ -192,11 +192,11 @@ export default function OnboardingPage() {
       .from("profiles")
       .update({
         full_name: cleanedName,
-        matric_number: cleanedMatric,
+        matric_number: cleanedMatric || null,
         school_id: Number(schoolId),
         department_id: Number(departmentId),
         level: Number(level),
-        student_status: studentStatus,
+        student_status: resolvedStatus,
         onboarding_completed: true,
       })
       .eq("id", session.user.id);
@@ -278,9 +278,12 @@ export default function OnboardingPage() {
               icon={<Hash size={18} />}
               value={matricNumber}
               onChange={(value) => setMatricNumber(value.toUpperCase())}
-              placeholder="Your matric number"
+              placeholder="Add it when you receive it"
               uppercase
             />
+            <p className="-mt-3 text-xs text-black/38 dark:text-white/32">
+              You can leave this blank and add your matric number later.
+            </p>
 
             <SelectField
               label="School"
@@ -321,7 +324,10 @@ export default function OnboardingPage() {
                     <button
                       key={item}
                       type="button"
-                      onClick={() => setLevel(String(item))}
+                      onClick={() => {
+                        setLevel(String(item));
+                        if (item === 100) setStudentStatus("fresher");
+                      }}
                       className={`min-h-12 min-w-0 rounded-[16px] border px-1 text-sm font-black transition active:scale-[0.98] ${
                         active
                           ? "border-[#79b98f]/40 bg-[#dff3e5]/80 text-[#245c3a] shadow-sm dark:border-[#8ce6ad]/20 dark:bg-[#8ce6ad]/15 dark:text-[#a9efc1]"
@@ -337,6 +343,11 @@ export default function OnboardingPage() {
 
             <div className="min-w-0">
               <label className="text-sm font-bold text-black/60 dark:text-white/60">Student status</label>
+              {level === "100" && (
+                <p className="mt-1 text-xs font-semibold text-[#397451] dark:text-[#9bedb7]">
+                  100L students are automatically marked as Freshers.
+                </p>
+              )}
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {(["fresher", "returning"] as const).map((status) => {
                   const active = studentStatus === status;
