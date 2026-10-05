@@ -141,9 +141,11 @@ export default function OnboardingPage() {
     setDepartmentId(profile.department_id ? String(profile.department_id) : "");
     setLevel(profile.level ? String(profile.level) : "");
     setStudentStatus(
-      profile.student_status === "fresher" || profile.student_status === "returning"
-        ? profile.student_status
-        : "",
+      String(profile.level ?? "") === "100"
+        ? "fresher"
+        : profile.student_status === "fresher" || profile.student_status === "returning"
+          ? profile.student_status
+          : "",
     );
     setEditingExistingProfile(Boolean(profile.onboarding_completed));
     setLoading(false);
