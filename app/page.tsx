@@ -57,18 +57,21 @@ const popularPlaces = [
     category: "Study",
     icon: Library,
     label: "Popular",
+    slug: "futa-library",
   },
   {
     name: "Health Centre",
     category: "Health",
     icon: ShieldPlus,
     label: "Essential",
+    slug: "health-centre",
   },
   {
     name: "Student Affairs",
     category: "Student Services",
     icon: GraduationCap,
     label: "Useful",
+    slug: "student-affairs",
   },
 ];
 
@@ -306,7 +309,7 @@ export default function HomePage() {
 
           <button
             type="button"
-            onClick={() => router.push("/explore")}
+            onClick={() => router.push(`/explore?place=${place.slug}`)}
             className="group mt-7 flex min-h-[62px] w-full items-center gap-4 rounded-[22px] border border-white/70 bg-white/48 px-4 text-left shadow-[0_18px_55px_rgba(21,51,33,0.12)] backdrop-blur-3xl transition hover:bg-white/58 dark:border-white/10 dark:bg-[#0c1511]/45 dark:hover:bg-[#0c1511]/55 sm:px-5"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-white/70 bg-white/55 text-[#336f49] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:text-[#a9efc1]">
