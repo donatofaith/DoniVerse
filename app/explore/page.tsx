@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/lib/supabase/client";
@@ -85,6 +85,7 @@ const categories: { label: string; value: CategoryFilter; icon: React.ElementTyp
 
 export default function ExplorePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const reduceMotion = useReducedMotion();
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,6 +162,22 @@ export default function ExplorePage() {
       return categoryMatch && searchMatch;
     });
   }, [places, search, activeCategory]);
+
+  useEffect(() => {
+    const requestedSlug = searchParams.get("place");
+    if (!requestedSlug || places.length === 0) return;
+
+    const requestedPlace = places.find((place) =>
+      place.slug === requestedSlug ||
+      place.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === requestedSlug,
+    );
+
+    if (requestedPlace) {
+      setSelectedPlace(requestedPlace);
+      setActiveCategory("all");
+      setSearch("");
+    }
+  }, [searchParams, places]);
 
   useEffect(() => {
     if (selectedPlace && !filteredPlaces.some((place) => place.id === selectedPlace.id)) {
